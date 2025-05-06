@@ -1,7 +1,7 @@
 package com.labelinternational.apiinternationallabel.Repository;
 
-import com.labelinternational.apiinternationallabel.Entity.Ink;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface InkRepository extends JpaRepository<Ink, Long> {
+public interface InPaperRepository extends JpaRepository {
+
 }

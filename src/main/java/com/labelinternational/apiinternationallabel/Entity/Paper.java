@@ -1,13 +1,25 @@
 package com.labelinternational.apiinternationallabel.Entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 
 @Entity
 public class Paper {
 
     @Id
+    @GeneratedValue
     private Long id_Paper;
+
+    @Column(unique=true)
+    private String material;
+
+    @Column(unique=true)
+    private Float width;
+
+    @Column(unique=true)
+    private Float large;
 
     public void setId_Paper(Long idPaper) {
         this.id_Paper = idPaper;
