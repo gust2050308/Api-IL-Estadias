@@ -53,7 +53,7 @@ public class InInkService {
     public ResponseEntity<List<InInk>> getAllInInk() {
         try{
             List<InInk> inInks = inInkRepository.findAll();
-            if(inInks.size() > 0) {
+            if(!inInks.isEmpty()) {
                 return new ResponseEntity<>(inInks, HttpStatus.OK);
             }else {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);

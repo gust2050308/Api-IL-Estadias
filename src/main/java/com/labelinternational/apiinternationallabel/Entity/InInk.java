@@ -9,6 +9,7 @@ import java.util.Date;
 public class InInk {
     @Id
     @GeneratedValue
+    @Column(unique = true, nullable = false)
     private Long id_InInk;
 
     @Column(nullable = false)

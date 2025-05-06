@@ -10,6 +10,7 @@ public class Paper {
 
     @Id
     @GeneratedValue
+    @Column(unique = true, nullable = false)
     private Long id_Paper;
 
     @Column(unique=true)

@@ -11,6 +11,7 @@ public class Provider {
 
     @Id
     @GeneratedValue
+    @Column(unique = true, nullable = false)
     private Long id_Provider;
 
     @Column(nullable = false)

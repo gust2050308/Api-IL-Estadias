@@ -19,6 +19,7 @@ public class Ink {
 
     @Id
     @GeneratedValue
+    @Column(unique = true, nullable = false)
     private Long id_ink;
 
     @Column(nullable = false)

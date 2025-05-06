@@ -12,6 +12,8 @@ public class PurchaseOrder {
 
 
     @Id
+    @GeneratedValue
+    @Column(unique = true, nullable = false)
     private Long id_PurchaseOrder;
 
     @Column(unique=true)

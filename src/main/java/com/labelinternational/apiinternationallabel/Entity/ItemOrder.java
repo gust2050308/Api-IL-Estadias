@@ -1,5 +1,6 @@
 package com.labelinternational.apiinternationallabel.Entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
@@ -8,6 +9,7 @@ import jakarta.persistence.Id;
 public class ItemOrder {
     @Id
     @GeneratedValue
+    @Column(unique = true, nullable = false)
     private Long id_ItemOrder;
 
     private Long amount;
