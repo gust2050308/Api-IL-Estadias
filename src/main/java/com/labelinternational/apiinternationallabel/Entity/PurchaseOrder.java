@@ -10,7 +10,6 @@ import java.util.List;
 @Entity
 public class PurchaseOrder {
 
-
     @Id
     @GeneratedValue
     @Column(unique = true, nullable = false)
