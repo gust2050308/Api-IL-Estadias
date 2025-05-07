@@ -1,23 +1,49 @@
 package com.labelinternational.apiinternationallabel.Entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import jakarta.persistence.*;
 
 @Entity
 public class ItemOrder {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(unique = true, nullable = false)
     private Long id_ItemOrder;
 
+    @Column(nullable = false)
     private Long amount;
 
+    @Column(nullable = false)
     private String CodeItem;
 
+    @Column(nullable = false)
     private String Item;
 
+    /*
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "orden_id", nullable = false)
+    @JsonIgnoreProperties("items")
+    private PurchaseOrder purchaseOrder;*/
+
+    @Column(nullable = false)
+    private Long purchaseOrderID;
+
+    public Long getPurchaseOrderID() {
+        return purchaseOrderID;
+    }
+
+    public void setPurchaseOrderID(Long purchaseOrderID) {
+        this.purchaseOrderID = purchaseOrderID;
+    }
+    /*
+    public PurchaseOrder getPurchaseOrder() {
+        return purchaseOrder;
+    }
+
+    public void setPurchaseOrder(PurchaseOrder ordenCompra) {
+        this.purchaseOrder = ordenCompra;
+    }*/
 
     public void setAmount(Long amount) {
         this.amount = amount;

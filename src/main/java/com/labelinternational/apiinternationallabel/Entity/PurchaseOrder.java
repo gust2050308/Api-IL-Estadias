@@ -4,6 +4,7 @@ package com.labelinternational.apiinternationallabel.Entity;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -11,8 +12,8 @@ import java.util.List;
 public class PurchaseOrder {
 
     @Id
-    @GeneratedValue
-    @Column(unique = true, nullable = false)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(nullable = false)
     private Long id_PurchaseOrder;
 
     @Column(unique=true)
@@ -40,9 +41,12 @@ public class PurchaseOrder {
     @Column(nullable=false)
     private String deliveryPlace;
 
-    @OneToMany(fetch = FetchType.LAZY)
-    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-    private List<ItemOrder> items;
+    @OneToMany(/*mappedBy = "purchaseOrder",*/
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.LAZY)
+    @JsonIgnoreProperties("purchaseOrder")
+    private List<ItemOrder> items = new ArrayList<>();
 
     public void setId_PurchaseOrder(Long idPurchaseOrder) {
         this.id_PurchaseOrder = idPurchaseOrder;
@@ -86,5 +90,41 @@ public class PurchaseOrder {
 
     public List<ItemOrder> getItems() {
         return items;
+    }
+
+    public void setPurchaseOrderNumber(String purchaseOrderNumber) {
+        this.purchaseOrderNumber = purchaseOrderNumber;
+    }
+
+    public void setProvider(Provider provider) {
+        this.provider = provider;
+    }
+
+    public void setRequiredBy(String requiredBy) {
+        this.requiredBy = requiredBy;
+    }
+
+    public void setPurchaseDate(Date purchaseDate) {
+        this.purchaseDate = purchaseDate;
+    }
+
+    public void setPaymentMethod(String paymentMethod) {
+        this.paymentMethod = paymentMethod;
+    }
+
+    public void setDeliveryDate(Date deliveryDate) {
+        this.deliveryDate = deliveryDate;
+    }
+
+    public void setShipment(String shipment) {
+        this.shipment = shipment;
+    }
+
+    public void setDeliveryPlace(String deliveryPlace) {
+        this.deliveryPlace = deliveryPlace;
+    }
+
+    public void setItems(List<ItemOrder> items) {
+        this.items = items;
     }
 }
