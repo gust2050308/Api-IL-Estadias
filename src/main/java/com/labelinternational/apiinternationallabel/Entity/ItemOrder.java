@@ -1,7 +1,6 @@
 package com.labelinternational.apiinternationallabel.Entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 @Entity
@@ -15,66 +14,54 @@ public class ItemOrder {
     private Long amount;
 
     @Column(nullable = false)
-    private String CodeItem;
+    private String codeItem;
 
     @Column(nullable = false)
-    private String Item;
+    private String item;
 
-    /*
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "orden_id", nullable = false)
+    @JoinColumn(name = "purchase_order_id", nullable = false)
     @JsonIgnoreProperties("items")
-    private PurchaseOrder purchaseOrder;*/
+    private PurchaseOrder purchaseOrder;
 
-    @Column(nullable = false)
-    private Long purchaseOrderID;
-
-    public Long getPurchaseOrderID() {
-        return purchaseOrderID;
+    // Getters y Setters
+    public Long getId_ItemOrder() {
+        return id_ItemOrder;
     }
 
-    public void setPurchaseOrderID(Long purchaseOrderID) {
-        this.purchaseOrderID = purchaseOrderID;
+    public void setId_ItemOrder(Long id_ItemOrder) {
+        this.id_ItemOrder = id_ItemOrder;
     }
-    /*
-    public PurchaseOrder getPurchaseOrder() {
-        return purchaseOrder;
-    }
-
-    public void setPurchaseOrder(PurchaseOrder ordenCompra) {
-        this.purchaseOrder = ordenCompra;
-    }*/
-
-    public void setAmount(Long amount) {
-        this.amount = amount;
-    }
-
-    public void setCodeItem(String codeItem) {
-        CodeItem = codeItem;
-    }
-
-    public void setItem(String item) {
-        Item = item;
-    }
-
 
     public Long getAmount() {
         return amount;
     }
 
+    public void setAmount(Long amount) {
+        this.amount = amount;
+    }
+
     public String getCodeItem() {
-        return CodeItem;
+        return codeItem;
+    }
+
+    public void setCodeItem(String codeItem) {
+        this.codeItem = codeItem;
     }
 
     public String getItem() {
-        return Item;
+        return item;
     }
 
-    public void setId_ItemOrder(Long idItemOrder) {
-        this.id_ItemOrder = idItemOrder;
+    public void setItem(String item) {
+        this.item = item;
     }
 
-    public Long getId_ItemOrder() {
-        return id_ItemOrder;
+    public PurchaseOrder getPurchaseOrder() {
+        return purchaseOrder;
+    }
+
+    public void setPurchaseOrder(PurchaseOrder purchaseOrder) {
+        this.purchaseOrder = purchaseOrder;
     }
 }

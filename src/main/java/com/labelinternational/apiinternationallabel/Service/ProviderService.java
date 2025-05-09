@@ -2,6 +2,7 @@ package com.labelinternational.apiinternationallabel.Service;
 
 import com.labelinternational.apiinternationallabel.Entity.Provider;
 import com.labelinternational.apiinternationallabel.Repository.ProviderRepository;
+import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,8 @@ public class ProviderService {
 
     private static final Logger log = LoggerFactory.getLogger(InInkService.class);
 
+
+    @Transactional
     public ResponseEntity<Provider> createProvider(Provider provider) {
         try{
             providerRepository.save(provider);
@@ -30,6 +33,7 @@ public class ProviderService {
         }
     }
 
+    @Transactional
     public ResponseEntity<Provider> findById(Long id) {
         try{
             Optional<Provider> provider = providerRepository.findById(id);
@@ -43,6 +47,7 @@ public class ProviderService {
         }
     }
 
+    @Transactional
     public ResponseEntity<List<Provider>> findAll() {
         try{
             List<Provider> providers = providerRepository.findAll();
@@ -56,6 +61,7 @@ public class ProviderService {
         }
     }
 
+    @Transactional
     public ResponseEntity<Provider> updateProvider(Provider provider) {
         try{
             Optional<Provider> searchProvider = providerRepository.findById(provider.getId_Provider());
@@ -73,6 +79,7 @@ public class ProviderService {
         }
     }
 
+    @Transactional
     public ResponseEntity<Provider> deleteProvider(Long id) {
         try{
             Optional<Provider> searchProvider = providerRepository.findById(id);

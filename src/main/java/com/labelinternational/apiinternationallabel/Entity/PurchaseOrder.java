@@ -13,14 +13,14 @@ public class PurchaseOrder {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(nullable = false)
+    @Column(nullable = false, unique = false)
     private Long id_PurchaseOrder;
 
     @Column(unique=true)
     private String purchaseOrderNumber;
 
-    @OneToOne
-    @JoinColumn(nullable=false)
+    @ManyToOne  // Cambiada de @OneToOne a @ManyToOne
+    @JoinColumn(nullable = false)
     private Provider provider;
 
     @Column(nullable=false)

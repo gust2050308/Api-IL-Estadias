@@ -2,6 +2,7 @@ package com.labelinternational.apiinternationallabel.Service;
 
 import com.labelinternational.apiinternationallabel.Entity.ItemOrder;
 import com.labelinternational.apiinternationallabel.Repository.ItemOrderRepository;
+import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,7 @@ public class ItemOrderService {
 
     private static final Logger log = LoggerFactory.getLogger(InInkService.class);
 
+    @Transactional
     public boolean createItemOrder(ItemOrder itemOrder) {
         try {
             itemOrderRepository.save(itemOrder);
@@ -29,6 +31,8 @@ public class ItemOrderService {
         }
     }
 
+
+    @Transactional
     public boolean updateItemOrder(ItemOrder itemOrder) {
         try {
             Optional<ItemOrder> itemOrderTemp = itemOrderRepository.findById(itemOrder.getId_ItemOrder());
@@ -45,6 +49,7 @@ public class ItemOrderService {
         }
     }
 
+    @Transactional
     public boolean deleteItemOrder(ItemOrder itemOrder) {
         try {
             Optional<ItemOrder> itemOrderTemp = itemOrderRepository.findById(itemOrder.getId_ItemOrder());

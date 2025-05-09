@@ -2,6 +2,7 @@ package com.labelinternational.apiinternationallabel.Service;
 
 import com.labelinternational.apiinternationallabel.Entity.Ink;
 import com.labelinternational.apiinternationallabel.Repository.InkRepository;
+import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,7 @@ public class InkService {
 
     private static final Logger log = LoggerFactory.getLogger(InInkService.class);
 
+    @Transactional
     public ResponseEntity<Ink> createInk(Ink ink) {
         try{
             inkRepository.save(ink);
@@ -30,6 +32,7 @@ public class InkService {
         }
     }
 
+    @Transactional
     public ResponseEntity<Ink> findInkById(Long id) {
         try{ Optional<Ink> ink = inkRepository.findById(id);
             if(ink.isPresent()){
@@ -42,6 +45,7 @@ public class InkService {
         }
     }
 
+    @Transactional
     public ResponseEntity<List<Ink>> findAllInk() {
         try {
             List<Ink> inks = inkRepository.findAll();
@@ -56,6 +60,7 @@ public class InkService {
         }
     }
 
+    @Transactional
     public ResponseEntity<Ink> updateInk(Ink ink) {
         try {
             Optional<Ink> search = inkRepository.findById(ink.getId_ink());
@@ -73,6 +78,7 @@ public class InkService {
         }
     }
 
+    @Transactional
     public ResponseEntity<Ink> deleteInkById(Long id) {
         Optional<Ink> ink = inkRepository.findById(id);
         if(ink.isPresent()){

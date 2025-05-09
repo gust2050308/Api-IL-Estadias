@@ -27,6 +27,7 @@ public class PurchaseOrderService {
 
     private static final Logger log = LoggerFactory.getLogger(InInkService.class);
 
+    @Transactional
     public ResponseEntity<?> createPurchaseOrder(PurchaseOrder purchaseOrder) {
         try {
             // Verificar si la lista de ítems no está vacía o nula
@@ -34,27 +35,27 @@ public class PurchaseOrderService {
                 return new ResponseEntity<>("La orden de compra debe tener al menos un Elemento", HttpStatus.NOT_ACCEPTABLE);
             }
 
+            // Crear la orden de compra sin los ítems (Hibernate manejará la relación)
             List<ItemOrder> items = purchaseOrder.getItems();
+            purchaseOrder.setItems(new ArrayList<>());
+            PurchaseOrder savedOrder = purchaseOrderRepository.save(purchaseOrder);
 
-            purchaseOrder.setItems(null);
-            purchaseOrderRepository.save(purchaseOrder);
-            log.info("LLEGA AQUI");
-
-
-            PurchaseOrder newPurchaseOrder = purchaseOrderRepository.findByPurchaseOrderNumber(purchaseOrder.getPurchaseOrderNumber());
-            log.info(purchaseOrder.getId_PurchaseOrder().toString());
+            // Asignar la relación de cada ítem con la orden de compra creada
             for (ItemOrder itemOrder : items) {
-                itemOrder.setPurchaseOrderID(newPurchaseOrder.getId_PurchaseOrder());
+                itemOrder.setPurchaseOrder(savedOrder);
+                itemOrderRepository.save(itemOrder);
             }
 
-            purchaseOrderRepository.save(newPurchaseOrder);
-            return new ResponseEntity<>(purchaseOrder, HttpStatus.CREATED);
+            savedOrder.setItems(items);
+            purchaseOrderRepository.save(savedOrder);
 
+            return new ResponseEntity<>(savedOrder, HttpStatus.CREATED);
         } catch (Exception e) {
             log.error("Error al crear la orden de compra: {}", e.getMessage(), e);
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 
 
 
@@ -71,6 +72,7 @@ public class PurchaseOrderService {
         }
     }
 
+    @Transactional
     public ResponseEntity<List<PurchaseOrder>> getAllPurchaseOrders() {
         try {
             List<PurchaseOrder> purchaseOrders = purchaseOrderRepository.findAll();
@@ -111,7 +113,7 @@ public class PurchaseOrderService {
 
                 for (ItemOrder newItem : purchaseOrder.getItems()) {
                     if (newItem.getId_ItemOrder() == null) {
-                        newItem.setPurchaseOrderID(purchaseOrderDB.getId_PurchaseOrder());
+                        newItem.setPurchaseOrder(purchaseOrderDB);
                         updatedItems.add(newItem);
                     } else {
                         boolean exists = false;
@@ -127,7 +129,7 @@ public class PurchaseOrderService {
                             }
                         }
                         if (!exists) {
-                            newItem.setPurchaseOrderID(purchaseOrderDB.getId_PurchaseOrder());
+                            newItem.setPurchaseOrder(purchaseOrderDB);
                             updatedItems.add(newItem);
                         }
                     }
@@ -146,6 +148,7 @@ public class PurchaseOrderService {
         }
     }
 
+    @Transactional
     public ResponseEntity<PurchaseOrder> deletePurchaseOrder(Long id) {
         try {
             Optional<PurchaseOrder> search = purchaseOrderRepository.findById(id);

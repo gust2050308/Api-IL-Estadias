@@ -17,8 +17,8 @@ public class InInkController {
     InInkService inInkService;
 
     @PostMapping
-    public ResponseEntity<InInk> createInInk(@RequestBody InInk inInk) {
-        return inInkService.create(inInk);
+    public ResponseEntity<?> createInInk(@RequestBody InInk inInk) {
+        return inInkService.createInInk(inInk);
     }
 
     @GetMapping

@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 
 import java.util.Date;
 
+
 @Entity
 public class InInk {
     @Id
@@ -15,14 +16,14 @@ public class InInk {
     @Column(nullable = false)
     private Date dateEntry;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(nullable = false)
     private Provider provider;
 
     @Column(nullable = false)
     private String invoiceRemission;// INVOICE/REMISSION - FACTURA/REMISIÓN
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(nullable = false)
     private PurchaseOrder purchaseOrder;
 
@@ -101,5 +102,64 @@ public class InInk {
 
     public QualityCertificate getQualityCertificate() {
         return qualityCertificate;
+    }
+
+    public void setId_InInk(Long id_InInk) {
+        this.id_InInk = id_InInk;
+    }
+
+    public void setDateEntry(Date dateEntry) {
+        this.dateEntry = dateEntry;
+    }
+
+    public void setProvider(Provider provider) {
+        this.provider = provider;
+    }
+
+    public void setInvoiceRemission(String invoiceRemission) {
+        this.invoiceRemission = invoiceRemission;
+    }
+
+    public void setPurchaseOrder(PurchaseOrder purchaseOrder) {
+        this.purchaseOrder = purchaseOrder;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
+
+    public void setUnits(Long units) {
+        this.units = units;
+    }
+
+    public void setQuantity(Long quantity) {
+        this.quantity = quantity;
+    }
+
+    public void setBatchProvider(String batchProvider) {
+        this.batchProvider = batchProvider;
+    }
+
+    public void setQualityCertificate(QualityCertificate qualityCertificate) {
+        this.qualityCertificate = qualityCertificate;
+    }
+
+    public void setInternalBatch(String internalBatch) {
+        this.internalBatch = internalBatch;
+    }
+
+    @Version
+    private int version;
+
+    public Integer getVersion() {
+        return version;
+    }
+
+    public void setVersion(Integer version) {
+        this.version = version;
     }
 }
