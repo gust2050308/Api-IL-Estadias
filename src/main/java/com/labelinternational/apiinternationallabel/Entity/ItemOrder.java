@@ -6,7 +6,7 @@ import jakarta.persistence.*;
 @Entity
 public class ItemOrder {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(unique = true, nullable = false)
     private Long id_ItemOrder;
 

@@ -1,30 +1,28 @@
 package com.labelinternational.apiinternationallabel.Entity;
-
-
 import com.labelinternational.apiinternationallabel.Entity.Enums.QualityCertificate;
 import jakarta.persistence.*;
 
 import java.util.Date;
 
 @Entity
-public class InPaper {
+public class    InPaper {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(unique = true, nullable = false)
     private Long id_inPaper;
 
     @Column(nullable = false)
     private Date dateEntry;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(nullable = false)
     private Provider provider;
 
     @Column(nullable = false)
     private String invoiceRemission;// INVOICE/REMISSION - FACTURA/REMISIÓN
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(nullable = false)
     private PurchaseOrder purchaseOrder;
 
@@ -63,7 +61,7 @@ public class InPaper {
         return id_inPaper;
     }
 
-    public Date getDate() {
+    public Date getDateEntry() {
         return dateEntry;
     }
 
@@ -113,5 +111,16 @@ public class InPaper {
 
     public QualityCertificate getQualityCertificate() {
         return qualityCertificate;
+    }
+
+    @Version
+    private int version;
+
+    public Integer getVersion() {
+        return version;
+    }
+
+    public void setVersion(Integer version) {
+        this.version = version;
     }
 }

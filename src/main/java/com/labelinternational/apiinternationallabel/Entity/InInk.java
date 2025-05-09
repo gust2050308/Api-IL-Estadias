@@ -9,7 +9,7 @@ import java.util.Date;
 @Entity
 public class InInk {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(unique = true, nullable = false)
     private Long id_InInk;
 
@@ -37,7 +37,7 @@ public class InInk {
     private Long units;
 
     @Column(nullable = false)
-    private Long quantity;
+    private Long quantityKilograms;
 
     @Column(nullable = false)
     private String batchProvider;
@@ -89,7 +89,7 @@ public class InInk {
     }
 
     public Long getQuantity() {
-        return quantity;
+        return quantityKilograms;
     }
 
     public String getBatchProvider() {
@@ -136,8 +136,8 @@ public class InInk {
         this.units = units;
     }
 
-    public void setQuantity(Long quantity) {
-        this.quantity = quantity;
+    public void setQuantity(Long quantityKilograms) {
+        this.quantityKilograms = quantityKilograms;
     }
 
     public void setBatchProvider(String batchProvider) {

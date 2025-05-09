@@ -14,10 +14,12 @@ public interface PurchaseOrderRepository extends JpaRepository<PurchaseOrder, Lo
 
     PurchaseOrder findByPurchaseOrderNumber(String purchaseOrderNumber);
 
+    /*
     @Transactional
     @Modifying
     @Query(value = "INSERT INTO purchase_order (purchase_order_number, provider_id_provider, purchase_date, required_by, payment_method, delivery_date, shipment, delivery_place ) VALUES (:purchaseOrderNumber, :provider, :purchaseDate, :requiredBy, :paymentMethod, :deliveryDate, :shipment, :deliveryPlace)", nativeQuery = true)
     void insertPurchaseOrder(@Param("purchaseOrderNumber") String purchaseOrderNumber, @Param("provider")  Long provider, @Param("purchaseDate") Date purchaseDate, @Param("requiredBy")  String requiredBy, @Param("paymentMethod") String paymentMethod, @Param("deliveryDate") Date deliveryDate, @Param("shipment") String shipment, @Param("deliveryPlace") String deliveryPlace);
+*/
 
 
 }
