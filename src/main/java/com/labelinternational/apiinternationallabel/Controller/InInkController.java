@@ -41,4 +41,9 @@ public class InInkController {
         return inInkService.deleteInInk(id);
     }
 
+    @PostMapping("/several")
+    public ResponseEntity<?> createInInks(@RequestBody List<InInk> inInks) {
+        return inInkService.createSeveral(inInks);
+    }
+
 }

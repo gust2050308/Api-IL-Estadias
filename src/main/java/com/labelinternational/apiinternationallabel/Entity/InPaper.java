@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import java.util.Date;
 
 @Entity
-public class    InPaper {
+public class InPaper {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -98,4 +98,18 @@ public class InInkService {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @Transactional
+    public ResponseEntity<List<InInk>> createSeveral(List<InInk> inInks){
+        try{
+            if(!inInks.isEmpty()){
+                inInkRepository.saveAll(inInks);
+                return new ResponseEntity<>(inInks, HttpStatus.CREATED);
+            }
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }catch (Exception e){
+            log.error(e.getMessage());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }

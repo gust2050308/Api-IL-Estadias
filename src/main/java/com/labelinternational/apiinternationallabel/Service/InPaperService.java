@@ -93,4 +93,18 @@ public class InPaperService {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @Transactional
+    public ResponseEntity<List<InPaper>> createSeveral(List<InPaper> inPapers){
+        try {
+            if(!inPapers.isEmpty()){
+                inPaperRepository.saveAll(inPapers);
+                return new ResponseEntity<>(inPapers, HttpStatus.CREATED);
+            }
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }catch (Exception e){
+            log.error(e.getMessage());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }
