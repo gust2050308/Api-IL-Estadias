@@ -16,11 +16,10 @@ import java.util.Optional;
 @Service
 public class InkService {
 
-    @Autowired
     private InkRepository inkRepository;
 
-    private static final Logger log = LoggerFactory.getLogger(InInkService.class);
-/*
+    private static final Logger log = LoggerFactory.getLogger(InkService.class);
+
     @Transactional
     public ResponseEntity<Ink> createInk(Ink ink) {
         try{
@@ -63,10 +62,11 @@ public class InkService {
     @Transactional
     public ResponseEntity<Ink> updateInk(Ink ink) {
         try {
-            Optional<Ink> search = inkRepository.findById(ink.getId_ink());
+            Optional<Ink> search = inkRepository.findById(ink.getIdInk());
             if(search.isPresent()){
                 Ink ink1 = search.get();
-                ink.setId_ink(ink1.getId_ink());
+                Long id = ink1.getIdInk();
+                ink.setIdInk(id);
                 inkRepository.save(ink);
                 return new ResponseEntity<>(ink, HttpStatus.OK);
             }else {
@@ -87,5 +87,5 @@ public class InkService {
         }else {
             return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
         }
-    }*/
+    }
 }

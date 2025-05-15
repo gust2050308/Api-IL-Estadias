@@ -3,6 +3,7 @@ package com.labelinternational.apiinternationallabel.Entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.awt.*;
 import java.util.List;
 
 @Getter
@@ -24,11 +25,19 @@ public class Production {
     @JoinColumn(name = "idCustomer")
     private Customer customer;
 
-    public void setId(Long id) {
-        this.idProduction = id;
-    }
+    @OneToOne
+    @JoinColumn(name = "idDesignProduction")
+    private DesignProduction designProduction;
 
-    public Long getId() {
-        return idProduction;
-    }
+    @OneToOne
+    @JoinColumn(name = "idFinishes")
+    private Finishes finishes;
+
+    @OneToOne
+    @JoinColumn(name = "idPrePress")
+    private PrePress prePress;
+
+    @OneToOne
+    @JoinColumn(name = "idPress")
+    private Press Press;
 }
