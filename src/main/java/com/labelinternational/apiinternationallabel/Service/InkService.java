@@ -20,7 +20,7 @@ public class InkService {
     private InkRepository inkRepository;
 
     private static final Logger log = LoggerFactory.getLogger(InInkService.class);
-
+/*
     @Transactional
     public ResponseEntity<Ink> createInk(Ink ink) {
         try{
@@ -87,5 +87,5 @@ public class InkService {
         }else {
             return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
         }
-    }
+    }*/
 }

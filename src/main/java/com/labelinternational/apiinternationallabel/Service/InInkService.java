@@ -104,6 +104,9 @@ public class InInkService {
         try{
             if(!inInks.isEmpty()){
                 inInkRepository.saveAll(inInks);
+                for(InInk inInk : inInks){
+
+                }
                 return new ResponseEntity<>(inInks, HttpStatus.CREATED);
             }
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);

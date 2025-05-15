@@ -3,11 +3,17 @@ package com.labelinternational.apiinternationallabel.Entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 @Entity
 public class PurchaseOrder {
 
@@ -17,7 +23,7 @@ public class PurchaseOrder {
     private Long id_PurchaseOrder;
 
     @Column(unique=true)
-    private String purchaseOrderNumber;
+    private Long purchaseOrderNumber;
 
     @ManyToOne  // Cambiada de @OneToOne a @ManyToOne
     @JoinColumn(nullable = false)
@@ -41,90 +47,8 @@ public class PurchaseOrder {
     @Column(nullable=false)
     private String deliveryPlace;
 
-    @OneToMany(/*mappedBy = "purchaseOrder",*/
-            cascade = CascadeType.ALL,
-            orphanRemoval = true,
-            fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "purchaseOrder", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnoreProperties("purchaseOrder")
     private List<ItemOrder> items = new ArrayList<>();
 
-    public void setId_PurchaseOrder(Long idPurchaseOrder) {
-        this.id_PurchaseOrder = idPurchaseOrder;
-    }
-
-    public Long getId_PurchaseOrder() {
-        return id_PurchaseOrder;
-    }
-
-    public String getPurchaseOrderNumber() {
-        return purchaseOrderNumber;
-    }
-
-    public Provider getProvider() {
-        return provider;
-    }
-
-    public Date getPurchaseDate() {
-        return purchaseDate;
-    }
-
-    public String getRequiredBy() {
-        return requiredBy;
-    }
-
-    public String getPaymentMethod() {
-        return paymentMethod;
-    }
-
-    public Date getDeliveryDate() {
-        return deliveryDate;
-    }
-
-    public String getShipment() {
-        return shipment;
-    }
-
-    public String getDeliveryPlace() {
-        return deliveryPlace;
-    }
-
-    public List<ItemOrder> getItems() {
-        return items;
-    }
-
-    public void setPurchaseOrderNumber(String purchaseOrderNumber) {
-        this.purchaseOrderNumber = purchaseOrderNumber;
-    }
-
-    public void setProvider(Provider provider) {
-        this.provider = provider;
-    }
-
-    public void setRequiredBy(String requiredBy) {
-        this.requiredBy = requiredBy;
-    }
-
-    public void setPurchaseDate(Date purchaseDate) {
-        this.purchaseDate = purchaseDate;
-    }
-
-    public void setPaymentMethod(String paymentMethod) {
-        this.paymentMethod = paymentMethod;
-    }
-
-    public void setDeliveryDate(Date deliveryDate) {
-        this.deliveryDate = deliveryDate;
-    }
-
-    public void setShipment(String shipment) {
-        this.shipment = shipment;
-    }
-
-    public void setDeliveryPlace(String deliveryPlace) {
-        this.deliveryPlace = deliveryPlace;
-    }
-
-    public void setItems(List<ItemOrder> items) {
-        this.items = items;
-    }
 }

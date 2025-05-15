@@ -1,9 +1,15 @@
 package com.labelinternational.apiinternationallabel.Entity;
 import com.labelinternational.apiinternationallabel.Entity.Enums.QualityCertificate;
 import jakarta.persistence.*;
+import lombok.*;
 
 import java.util.Date;
 
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 @Entity
 public class InPaper {
 
@@ -35,7 +41,8 @@ public class InPaper {
     @Column(nullable = false)
     private Long units;
 
-    @Column(nullable = false)
+   @Getter
+   @Column(nullable = false)
     private String typeOfMeasures;
 
     @Column(nullable = false)
@@ -47,71 +54,12 @@ public class InPaper {
     @Column(nullable = false)
     private String batchProvider;
 
+    @Getter
     @Column(nullable = false)
     private String internalBatch;
 
     @Column(nullable = false)
     private QualityCertificate qualityCertificate;
-
-    public void setId_inPaper(Long idInPaper) {
-        this.id_inPaper = idInPaper;
-    }
-
-    public Long getId_inPaper() {
-        return id_inPaper;
-    }
-
-    public Date getDateEntry() {
-        return dateEntry;
-    }
-
-    public String getInvoiceRemission() {
-        return invoiceRemission;
-    }
-
-    public Provider getProvider() {
-        return provider;
-    }
-
-    public PurchaseOrder getPurchaseOrder() {
-        return purchaseOrder;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public String getCode() {
-        return code;
-    }
-
-    public Long getUnits() {
-        return units;
-    }
-
-    public String getTypeOfMeasures() {
-        return typeOfMeasures;
-    }
-
-    public Long getWeightPaper() {
-        return weightPaper;
-    }
-
-    public Long getLargePaper() {
-        return largePaper;
-    }
-
-    public String getBatchProvider() {
-        return batchProvider;
-    }
-
-    public String getInternalBatch() {
-        return internalBatch;
-    }
-
-    public QualityCertificate getQualityCertificate() {
-        return qualityCertificate;
-    }
 
     @Version
     private int version;

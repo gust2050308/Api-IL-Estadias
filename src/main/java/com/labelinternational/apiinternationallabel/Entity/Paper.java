@@ -1,7 +1,13 @@
 package com.labelinternational.apiinternationallabel.Entity;
 
 import jakarta.persistence.*;
+import lombok.*;
 
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 @Entity
 public class Paper {
 
@@ -10,20 +16,22 @@ public class Paper {
     @Column(unique = true, nullable = false)
     private Long id_Paper;
 
-    @Column(unique=true)
-    private String material;
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn
+    private InPaper inPaper;
 
-    @Column(unique=true)
-    private Float width;
+    @ManyToOne
+    @JoinColumn(name = "idProduction")
+    private Production production;
 
-    @Column(unique=true)
-    private Float large;
+    @Column(nullable = true)
+    private Long LargeUsed;
 
-    public void setId_Paper(Long idPaper) {
-        this.id_Paper = idPaper;
-    }
+    @Column(nullable = true)
+    private Long widthUsed;
 
-    public Long getId_Paper() {
-        return id_Paper;
-    }
+    @Column(nullable = false)
+    private Long remainingVolume;
+
+
 }

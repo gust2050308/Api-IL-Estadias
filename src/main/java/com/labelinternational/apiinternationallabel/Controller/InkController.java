@@ -12,6 +12,7 @@ import java.util.List;
 @RequestMapping("/api/ink")
 public class InkController {
 
+    /*
     @Autowired
     private InkService inkService;
 
@@ -39,5 +40,5 @@ public class InkController {
     public ResponseEntity<Ink> delete(@PathVariable Long id) {
         return inkService.deleteInkById(id);
     }
-
+*/
 }

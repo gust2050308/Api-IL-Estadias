@@ -74,6 +74,17 @@
 			<artifactId>hibernate-validator</artifactId>
 			<version>8.0.0.Final</version> <!-- Usa la versión compatible con tu configuración -->
 		</dependency>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<version>1.18.30</version> <!-- Muy estable -->
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<scope>provided</scope>
+		</dependency>
 
 	</dependencies>
 

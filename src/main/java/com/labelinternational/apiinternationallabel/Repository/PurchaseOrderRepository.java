@@ -12,7 +12,7 @@ import java.util.Optional;
 
 public interface PurchaseOrderRepository extends JpaRepository<PurchaseOrder, Long> {
 
-    PurchaseOrder findByPurchaseOrderNumber(String purchaseOrderNumber);
+    PurchaseOrder findByPurchaseOrderNumber(Long purchaseOrderNumber);
 
     /*
     @Transactional

@@ -2,9 +2,17 @@ package com.labelinternational.apiinternationallabel.Entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import lombok.*;
 
+
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 @Entity
 public class ItemOrder {
+    // Getters y Setters
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(unique = true, nullable = false)
@@ -24,44 +32,4 @@ public class ItemOrder {
     @JsonIgnoreProperties("items")
     private PurchaseOrder purchaseOrder;
 
-    // Getters y Setters
-    public Long getId_ItemOrder() {
-        return id_ItemOrder;
-    }
-
-    public void setId_ItemOrder(Long id_ItemOrder) {
-        this.id_ItemOrder = id_ItemOrder;
-    }
-
-    public Long getAmount() {
-        return amount;
-    }
-
-    public void setAmount(Long amount) {
-        this.amount = amount;
-    }
-
-    public String getCodeItem() {
-        return codeItem;
-    }
-
-    public void setCodeItem(String codeItem) {
-        this.codeItem = codeItem;
-    }
-
-    public String getItem() {
-        return item;
-    }
-
-    public void setItem(String item) {
-        this.item = item;
-    }
-
-    public PurchaseOrder getPurchaseOrder() {
-        return purchaseOrder;
-    }
-
-    public void setPurchaseOrder(PurchaseOrder purchaseOrder) {
-        this.purchaseOrder = purchaseOrder;
-    }
 }
