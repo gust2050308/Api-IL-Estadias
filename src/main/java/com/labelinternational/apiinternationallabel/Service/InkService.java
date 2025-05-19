@@ -16,6 +16,7 @@ import java.util.Optional;
 @Service
 public class InkService {
 
+    @Autowired
     private InkRepository inkRepository;
 
     private static final Logger log = LoggerFactory.getLogger(InkService.class);
@@ -86,6 +87,20 @@ public class InkService {
             return new ResponseEntity<>(ink.get(), HttpStatus.OK);
         }else {
             return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @Transactional
+    public ResponseEntity<List<Ink>> getAvialableInks() {
+        try{
+            List<Ink> inks = inkRepository.findInksWithStock();
+            if(!inks.isEmpty()){
+                return new ResponseEntity<>(inks, HttpStatus.OK);
+            }
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        }catch (Exception e){
+            log.error(e.getMessage());
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

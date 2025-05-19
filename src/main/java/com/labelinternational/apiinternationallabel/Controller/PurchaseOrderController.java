@@ -39,4 +39,9 @@ public class PurchaseOrderController {
     public ResponseEntity<PurchaseOrder> deletePurchaseOrder(@PathVariable Long id) {
         return purchaseOrderService.deletePurchaseOrder(id);
     }
+
+    @GetMapping("/findIncompleteOrders")
+    public ResponseEntity<List<PurchaseOrder>> findIncompleteOrders() {
+        return purchaseOrderService.findIncompleteOrders();
+    }
 }

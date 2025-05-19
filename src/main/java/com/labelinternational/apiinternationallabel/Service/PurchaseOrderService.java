@@ -1,8 +1,10 @@
 package com.labelinternational.apiinternationallabel.Service;
 
-import com.labelinternational.apiinternationallabel.Entity.ItemOrder;
+import com.labelinternational.apiinternationallabel.Entity.InkItemOrder;
+import com.labelinternational.apiinternationallabel.Entity.PaperItemOrder;
 import com.labelinternational.apiinternationallabel.Entity.PurchaseOrder;
-import com.labelinternational.apiinternationallabel.Repository.ItemOrderRepository;
+import com.labelinternational.apiinternationallabel.Repository.InkItemOrderRepository;
+import com.labelinternational.apiinternationallabel.Repository.PaperItemOrderRepository;
 import com.labelinternational.apiinternationallabel.Repository.PurchaseOrderRepository;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
@@ -11,10 +13,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Queue;
 
 @Service
 public class PurchaseOrderService {
@@ -23,41 +25,55 @@ public class PurchaseOrderService {
     private PurchaseOrderRepository purchaseOrderRepository;
 
     @Autowired
-    private ItemOrderRepository itemOrderRepository;
+    private InkItemOrderRepository inkItemOrderRepository;
+
+    @Autowired
+    private PaperItemOrderRepository paperItemOrderRepository;
 
     private static final Logger log = LoggerFactory.getLogger(InInkService.class);
 
     @Transactional
     public ResponseEntity<?> createPurchaseOrder(PurchaseOrder purchaseOrder) {
         try {
-            // Verificar si la lista de ítems no está vacía o nula
-            if (purchaseOrder.getItems() == null || purchaseOrder.getItems().isEmpty()) {
-                return new ResponseEntity<>("La orden de compra debe tener al menos un Elemento", HttpStatus.NOT_ACCEPTABLE);
+            Optional<List<PaperItemOrder>> paperInPurchaseOredr = Optional.ofNullable(purchaseOrder.getPaperItems());
+            Optional<List<InkItemOrder>> inkInPurchaseOredr = Optional.ofNullable(purchaseOrder.getInkItems());
+            if (paperInPurchaseOredr.isPresent() || inkInPurchaseOredr.isPresent()) {
+                if (paperInPurchaseOredr.isPresent()) {
+
+                    List<PaperItemOrder> paperItems = paperInPurchaseOredr.get();
+
+                    purchaseOrder.setPaperItems(new ArrayList<>());
+                    PurchaseOrder savedOrder = purchaseOrderRepository.save(purchaseOrder);
+
+                    for (PaperItemOrder itemOrder : paperItems) {
+                        itemOrder.setPurchaseOrder(savedOrder);
+                        paperItemOrderRepository.save(itemOrder);
+                    }
+                    savedOrder.setPaperItems(paperItems);
+                    purchaseOrderRepository.save(savedOrder);
+
+                    return new ResponseEntity<>(savedOrder, HttpStatus.CREATED);
+                }
+                List<InkItemOrder> inkItems = inkInPurchaseOredr.get();
+
+                purchaseOrder.setInkItems(new ArrayList<>());
+                PurchaseOrder savedOrder = purchaseOrderRepository.save(purchaseOrder);
+
+                for (InkItemOrder itemOrder : inkItems) {
+                    itemOrder.setPurchaseOrder(savedOrder);
+                    inkItemOrderRepository.save(itemOrder);
+                }
+                savedOrder.setInkItems(inkItems);
+                purchaseOrderRepository.save(savedOrder);
+
+                return new ResponseEntity<>(savedOrder, HttpStatus.CREATED);
             }
-
-            // Crear la orden de compra sin los ítems (Hibernate manejará la relación)
-            List<ItemOrder> items = purchaseOrder.getItems();
-            purchaseOrder.setItems(new ArrayList<>());
-            PurchaseOrder savedOrder = purchaseOrderRepository.save(purchaseOrder);
-
-            // Asignar la relación de cada ítem con la orden de compra creada
-            for (ItemOrder itemOrder : items) {
-                itemOrder.setPurchaseOrder(savedOrder);
-                itemOrderRepository.save(itemOrder);
-            }
-
-            savedOrder.setItems(items);
-            purchaseOrderRepository.save(savedOrder);
-
-            return new ResponseEntity<>(savedOrder, HttpStatus.CREATED);
-        } catch (Exception e) {
+            return new ResponseEntity<>("La orden de compra debe tener al menos un Elemento", HttpStatus.NOT_ACCEPTABLE);
+        }catch (Exception e) {
             log.error("Error al crear la orden de compra: {}", e.getMessage(), e);
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
-
-
 
     public ResponseEntity<PurchaseOrder> getPurchaseOrderById(Long id) {
         try {
@@ -86,67 +102,71 @@ public class PurchaseOrderService {
         }
     }
 
+
     @Transactional
-    public ResponseEntity<PurchaseOrder> updatePurchaseOrder(PurchaseOrder purchaseOrder) {
+    public ResponseEntity<PurchaseOrder> updatePurchaseOrder(PurchaseOrder purchaseOrderUpdate, Long id) {
         try {
-            Optional<PurchaseOrder> search = purchaseOrderRepository.findById(purchaseOrder.getId_PurchaseOrder());
-            if (!search.isPresent()) {
+            Optional<PurchaseOrder> search = purchaseOrderRepository.findById(id);
+            if (search.isEmpty()) {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
 
             PurchaseOrder purchaseOrderDB = search.get();
 
-            purchaseOrderDB.setPurchaseOrderNumber(purchaseOrder.getPurchaseOrderNumber());
-            purchaseOrderDB.setPurchaseDate(purchaseOrder.getPurchaseDate());
-            purchaseOrderDB.setProvider(purchaseOrder.getProvider());
-            purchaseOrderDB.setPurchaseDate(purchaseOrder.getPurchaseDate());
-            purchaseOrderDB.setRequiredBy(purchaseOrder.getRequiredBy());
-            purchaseOrderDB.setPaymentMethod(purchaseOrder.getPaymentMethod());
-            purchaseOrderDB.setDeliveryDate(purchaseOrder.getDeliveryDate());
-            purchaseOrderDB.setShipment(purchaseOrder.getShipment());
-            purchaseOrderDB.setDeliveryPlace(purchaseOrder.getDeliveryPlace());
+            purchaseOrderDB.setPurchaseOrderNumber(purchaseOrderUpdate.getPurchaseOrderNumber());
+            purchaseOrderDB.setProvider(purchaseOrderUpdate.getProvider());
+            purchaseOrderDB.setRequestDate(purchaseOrderUpdate.getRequestDate());
+            purchaseOrderDB.setDeliveryDateExpected(purchaseOrderUpdate.getDeliveryDateExpected());
+            purchaseOrderDB.setDateDelivered(purchaseOrderUpdate.getDateDelivered());
+            purchaseOrderDB.setRequiredBy(purchaseOrderUpdate.getRequiredBy());
+            purchaseOrderDB.setPaymentMethod(purchaseOrderUpdate.getPaymentMethod());
+            purchaseOrderDB.setShipment(purchaseOrderUpdate.getShipment());
+            purchaseOrderDB.setDeliveryPlace(purchaseOrderUpdate.getDeliveryPlace());
 
-            if (purchaseOrder.getItems() != null) {
-                List<ItemOrder> existingItems = purchaseOrderDB.getItems();
+            if (Boolean.FALSE.equals(purchaseOrderDB.getTypeMaterial())) {
+                List<PaperItemOrder> updatedItems = purchaseOrderUpdate.getPaperItems();
+                List<PaperItemOrder> currentItems = purchaseOrderDB.getPaperItems();
 
-                List<ItemOrder> updatedItems = List.of();
-
-                for (ItemOrder newItem : purchaseOrder.getItems()) {
-                    if (newItem.getId_ItemOrder() == null) {
-                        newItem.setPurchaseOrder(purchaseOrderDB);
-                        updatedItems.add(newItem);
-                    } else {
-                        boolean exists = false;
-                        for (ItemOrder existingItem : existingItems) {
-                            if (existingItem.getId_ItemOrder().equals(newItem.getId_ItemOrder())) {
-                                existingItem.setAmount(newItem.getAmount());
-                                existingItem.setCodeItem(newItem.getCodeItem());
-                                existingItem.setItem(newItem.getItem());
-
-                                updatedItems.add(existingItem);
-                                exists = true;
-                                break;
-                            }
-                        }
-                        if (!exists) {
-                            newItem.setPurchaseOrder(purchaseOrderDB);
-                            updatedItems.add(newItem);
-                        }
+                for (PaperItemOrder current : currentItems) {
+                    if (updatedItems.stream().noneMatch(i -> i.getIdPaperItemOrder() != null && i.getIdPaperItemOrder().equals(current.getIdPaperItemOrder()))) {
+                        paperItemOrderRepository.deleteById(current.getIdPaperItemOrder());
                     }
                 }
-                existingItems.clear();
-                existingItems.addAll(updatedItems);
+
+                for (PaperItemOrder item : updatedItems) {
+                    item.setPurchaseOrder(purchaseOrderDB);
+                    paperItemOrderRepository.save(item);
+                }
+
+                purchaseOrderDB.setPaperItems(updatedItems);
+
+            } else {
+                List<InkItemOrder> updatedItems = purchaseOrderUpdate.getInkItems();
+                List<InkItemOrder> currentItems = purchaseOrderDB.getInkItems();
+
+                for (InkItemOrder current : currentItems) {
+                    if (updatedItems.stream().noneMatch(i -> i.getIdItemOrder() != null && i.getIdItemOrder().equals(current.getIdItemOrder()))) {
+                        inkItemOrderRepository.deleteById(current.getIdItemOrder());
+                    }
+                }
+
+                for (InkItemOrder item : updatedItems) {
+                    item.setPurchaseOrder(purchaseOrderDB);
+                    inkItemOrderRepository.save(item);
+                }
+
+                purchaseOrderDB.setInkItems(updatedItems);
             }
 
-
-            PurchaseOrder updatedOrder = purchaseOrderRepository.save(purchaseOrderDB);
-            return new ResponseEntity<>(updatedOrder, HttpStatus.OK);
+            PurchaseOrder saved = purchaseOrderRepository.save(purchaseOrderDB);
+            return new ResponseEntity<>(saved, HttpStatus.OK);
 
         } catch (Exception e) {
-            log.error("Error al actualizar   la orden de compra: {}", e.getMessage(), e);
+            log.error("Error actualizando orden de compra: {}", e.getMessage(), e);
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 
     @Transactional
     public ResponseEntity<PurchaseOrder> deletePurchaseOrder(Long id) {
@@ -158,6 +178,20 @@ public class PurchaseOrderService {
             }
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }catch(Exception e) {
+            log.error(e.getMessage());
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Transactional
+    public ResponseEntity<List<PurchaseOrder>> findIncompleteOrders(){
+        try {
+            List<PurchaseOrder> incompleteOrders = purchaseOrderRepository.findIncompleteOrders();
+            if(!incompleteOrders.isEmpty()) {
+                return new ResponseEntity<>(incompleteOrders, HttpStatus.OK);
+            }
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        }catch (Exception e) {
             log.error(e.getMessage());
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }

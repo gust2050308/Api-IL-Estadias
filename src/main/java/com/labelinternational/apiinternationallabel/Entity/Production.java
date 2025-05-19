@@ -18,8 +18,11 @@ public class Production {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idProduction;
 
+    @Column(nullable = false, unique = true)
+    private Long noProductionOrder;
+
     @OneToMany(mappedBy = "production")
-    private List<Ink> inks;
+    private List<OutputInk> outputInks;
 
     @ManyToOne
     @JoinColumn(name = "idCustomer")

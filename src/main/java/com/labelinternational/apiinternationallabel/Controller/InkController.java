@@ -41,4 +41,9 @@ public class InkController {
         return inkService.deleteInkById(id);
     }
 
+    @GetMapping("/findInksWithStock")
+    public ResponseEntity<List<Ink>> findInksWithStock() {
+        return inkService.getAvialableInks();
+    }
+
 }

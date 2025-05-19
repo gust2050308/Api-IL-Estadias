@@ -19,10 +19,10 @@ public class PurchaseOrder {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(nullable = false, unique = false)
+    @Column(nullable = false, unique = true)
     private Long id_PurchaseOrder;
 
-    @Column(unique=true)
+    @Column(unique=true, nullable = false)
     private Long purchaseOrderNumber;
 
     @ManyToOne  // Cambiada de @OneToOne a @ManyToOne
@@ -30,7 +30,13 @@ public class PurchaseOrder {
     private Provider provider;
 
     @Column(nullable=false)
-    private Date purchaseDate;
+    private Date requestDate;
+
+    @Column
+    private Date deliveryDateExpected;
+
+    @Column
+    private Date dateDelivered;
 
     @Column(nullable=false)
     private String requiredBy;
@@ -38,8 +44,8 @@ public class PurchaseOrder {
     @Column(nullable=false)
     private String paymentMethod;
 
-    @Column(nullable=false)
-    private Date deliveryDate;
+    /*@Column(nullable=false)
+    private Date deliveryDate;*/
 
     @Column(nullable=false)
     private String shipment;
@@ -47,8 +53,17 @@ public class PurchaseOrder {
     @Column(nullable=false)
     private String deliveryPlace;
 
+    @Column(nullable=false)
+    private Boolean isComplete = false;
+
+    @Column(nullable=false)
+    private Boolean typeMaterial; // "cero = '0'  es papel, uno = '1' tinta"
+
     @OneToMany(mappedBy = "purchaseOrder", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnoreProperties("purchaseOrder")
-    private List<ItemOrder> items = new ArrayList<>();
+    private List<InkItemOrder> inkItems= new ArrayList<>();
 
+    @OneToMany(mappedBy = "purchaseOrder", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnoreProperties("purchaseOrder")
+    private List<PaperItemOrder> paperItems = new ArrayList<>();
 }

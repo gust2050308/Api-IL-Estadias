@@ -1,5 +1,6 @@
 package com.labelinternational.apiinternationallabel.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -16,17 +17,20 @@ public class Ink {
     @Column(unique = true, nullable = false)
     private Long idInk;
 
-    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @OneToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn
     private InInk inInk;
 
     @Column(nullable = false)
-    private Long volumeUsed;
+    private Long totalKilograms;
 
     @Column(nullable = false)
-    private Long remainingVolume;
+    private Long volumeUsed = 0L;
+
+    @Column(nullable = false)
+    private Long remainingVolume ;
 
     @ManyToOne
-    @JoinColumn(name = "idProduction")
+    @JoinColumn(name = "idProduction", nullable = true)
     private Production production;
 }

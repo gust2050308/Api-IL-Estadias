@@ -1,7 +1,7 @@
 package com.labelinternational.apiinternationallabel.Service;
 
-import com.labelinternational.apiinternationallabel.Entity.ItemOrder;
-import com.labelinternational.apiinternationallabel.Repository.ItemOrderRepository;
+import com.labelinternational.apiinternationallabel.Entity.InkItemOrder;
+import com.labelinternational.apiinternationallabel.Repository.InkItemOrderRepository;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,15 +12,15 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 @Service
-public class ItemOrderService {
+public class InkItemOrderService {
 
     @Autowired
-    private ItemOrderRepository itemOrderRepository;
+    private InkItemOrderRepository itemOrderRepository;
 
     private static final Logger log = LoggerFactory.getLogger(InInkService.class);
 
     @Transactional
-    public boolean createItemOrder(ItemOrder itemOrder) {
+    public boolean createItemOrder(InkItemOrder itemOrder) {
         try {
             itemOrderRepository.save(itemOrder);
             return true;
@@ -33,9 +33,9 @@ public class ItemOrderService {
 
 
     @Transactional
-    public boolean updateItemOrder(ItemOrder itemOrder) {
+    public boolean updateItemOrder(InkItemOrder itemOrder) {
         try {
-            Optional<ItemOrder> itemOrderTemp = itemOrderRepository.findById(itemOrder.getId_ItemOrder());
+            Optional<InkItemOrder> itemOrderTemp = itemOrderRepository.findById(itemOrder.getIdItemOrder());
             if (itemOrderTemp.isPresent()) {
                 itemOrderRepository.save(itemOrder);
                 return true;
@@ -50,9 +50,9 @@ public class ItemOrderService {
     }
 
     @Transactional
-    public boolean deleteItemOrder(ItemOrder itemOrder) {
+    public boolean deleteItemOrder(InkItemOrder itemOrder) {
         try {
-            Optional<ItemOrder> itemOrderTemp = itemOrderRepository.findById(itemOrder.getId_ItemOrder());
+            Optional<InkItemOrder> itemOrderTemp = itemOrderRepository.findById(itemOrder.getIdItemOrder());
             if (itemOrderTemp.isPresent()) {
                 itemOrderRepository.delete(itemOrderTemp.get());
                 return true;

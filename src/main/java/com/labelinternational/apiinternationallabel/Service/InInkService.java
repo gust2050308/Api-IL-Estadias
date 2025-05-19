@@ -1,7 +1,9 @@
 package com.labelinternational.apiinternationallabel.Service;
 
 import com.labelinternational.apiinternationallabel.Entity.InInk;
+import com.labelinternational.apiinternationallabel.Entity.Ink;
 import com.labelinternational.apiinternationallabel.Repository.InInkRepository;
+import com.labelinternational.apiinternationallabel.Repository.InkRepository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.slf4j.Logger;
@@ -16,6 +18,9 @@ import java.util.Optional;
 
 @Service
 public class InInkService {
+
+    @Autowired
+    private InkRepository inkRepository;
 
     @Autowired
     private InInkRepository inInkRepository;
@@ -103,16 +108,26 @@ public class InInkService {
     public ResponseEntity<List<InInk>> createSeveral(List<InInk> inInks){
         try{
             if(!inInks.isEmpty()){
-                inInkRepository.saveAll(inInks);
-                for(InInk inInk : inInks){
+                List<InInk> savedInks = inInkRepository.saveAll(inInks);
 
-                }
-                return new ResponseEntity<>(inInks, HttpStatus.CREATED);
+                List<Ink> stockInks = savedInks.stream()
+                        .map(inInk -> Ink.builder()
+                                .inInk(inInk)
+                                .volumeUsed(0L)
+                                .totalKilograms(inInk.getQuantity() * inInk.getUnits())
+                                .remainingVolume(inInk.getQuantity() * inInk.getUnits())
+                                .build())
+                        .toList();
+
+                inkRepository.saveAll(stockInks);
+
+                return new ResponseEntity<>(savedInks, HttpStatus.CREATED);
             }
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }catch (Exception e){
-            log.error(e.getMessage());
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 }
