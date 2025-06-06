@@ -1,6 +1,7 @@
 package com.labelinternational.apiinternationallabel.Controller;
 
 
+import com.labelinternational.apiinternationallabel.Controller.DTOs.InkEntryDto;
 import com.labelinternational.apiinternationallabel.Entity.InInk;
 import com.labelinternational.apiinternationallabel.Service.InInkService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,8 +18,8 @@ public class InInkController {
     InInkService inInkService;
 
     @PostMapping
-    public ResponseEntity<?> createInInk(@RequestBody InInk inInk) {
-        return inInkService.createInInk(inInk);
+    public ResponseEntity<?> createInInk(@RequestBody List<InkEntryDto> inInks) {
+        return inInkService.createInInk(inInks);
     }
 
     @GetMapping
@@ -39,11 +40,6 @@ public class InInkController {
     @DeleteMapping("/{id}")
     public ResponseEntity<InInk> deleteInInk(@PathVariable Long id) {
         return inInkService.deleteInInk(id);
-    }
-
-    @PostMapping("/several")
-    public ResponseEntity<?> createInInks(@RequestBody List<InInk> inInks) {
-        return inInkService.createSeveral(inInks);
     }
 
 }

@@ -1,9 +1,14 @@
 package com.labelinternational.apiinternationallabel.Service;
 
+import com.labelinternational.apiinternationallabel.Controller.DTOs.InkEntryDto;
 import com.labelinternational.apiinternationallabel.Entity.InInk;
 import com.labelinternational.apiinternationallabel.Entity.Ink;
+import com.labelinternational.apiinternationallabel.Entity.InkItemOrder;
+import com.labelinternational.apiinternationallabel.Entity.PurchaseOrder;
 import com.labelinternational.apiinternationallabel.Repository.InInkRepository;
+import com.labelinternational.apiinternationallabel.Repository.InkItemOrderRepository;
 import com.labelinternational.apiinternationallabel.Repository.InkRepository;
+import com.labelinternational.apiinternationallabel.Repository.PurchaseOrderRepository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.slf4j.Logger;
@@ -25,20 +30,79 @@ public class InInkService {
     @Autowired
     private InInkRepository inInkRepository;
 
+    @Autowired
+    private InkItemOrderRepository inkItemOrderRepository;
+
+    @Autowired
+    private PurchaseOrderRepository purchaseOrderRepository;
+
     private static final Logger log = LoggerFactory.getLogger(InInkService.class);
 
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public ResponseEntity<?> createInInk(InInk inInk) {
+    public ResponseEntity<?> createInInk(List<InkEntryDto> inInks) {
         try {
-            inInkRepository.save(inInk);
-            return new ResponseEntity<>(inInk, HttpStatus.CREATED);
+            for (InkEntryDto inInk : inInks) {
+                Optional<InkItemOrder> itemOrderDB = inkItemOrderRepository.findById(inInk.getIdItemOrder());
 
-        } catch (RuntimeException e) {
-            log.error("Error al crear InInk: {}", e.getMessage(), e);
-            throw e;
+                InkItemOrder itemOrder = itemOrderDB.get();
+
+                InInk nuevo = InInk.builder()
+                        .dateEntry(inInk.getInkEntry().getDateEntry())
+                        .invoiceRemission(inInk.getInkEntry().getInvoiceRemission())
+                        .typeMaterial(inInk.getInkEntry().getTypeMaterial())
+                        .batchProvider(inInk.getInkEntry().getBatchProvider())
+                        .internalBatch(inInk.getInkEntry().getInternalBatch())
+                        .unitsArrived(inInk.getInkEntry().getUnitsArrived())
+                        .qualityCertificate(inInk.getInkEntry().getQualityCertificate())
+                        .itemOrder(itemOrder)
+                        .build();
+
+                itemOrder.setTotalUnitsQuantityArrived(itemOrder.getTotalUnitsQuantityArrived() + nuevo.getUnitsArrived());
+
+                if(itemOrder.getTotalUnitsQuantityArrived() >= itemOrder.getUnitsQuantity()){
+                    itemOrder.setIsSatisfied(true);
+                }
+
+                inInkRepository.save(nuevo);
+                inkItemOrderRepository.save(itemOrder);
+
+                Ink nuevaTinta = Ink.builder()
+                        .inInk(nuevo)
+                        .totalKilograms(nuevo.getUnitsArrived() * itemOrder.getAmountKilograms())
+                        .volumeUsed(0L)
+                        .remainingVolume(nuevo.getUnitsArrived() * itemOrder.getAmountKilograms())
+                        .build();
+
+                inkRepository.save(nuevaTinta);
+            }
+
+            Optional<InkItemOrder> itemTemp0 = inkItemOrderRepository.findById(inInks.get(0).getIdItemOrder());
+            InkItemOrder itemTemp = itemTemp0.get();
+            Optional<PurchaseOrder> orderTemp = purchaseOrderRepository.findByPurchaseOrderNumberNativeQuery(itemTemp.getPurchaseOrder().getPurchaseOrderNumber());
+            if (orderTemp.isPresent()) {
+                PurchaseOrder orderTemp2 = orderTemp.get();
+                List<InkItemOrder> listToCheck = orderTemp.get().getInkItems();
+                boolean flag = false;
+
+                for(InkItemOrder order : listToCheck ){
+                    if(order.getIsSatisfied()){
+                        flag = true;
+                    }else {
+                        flag = false;
+                        break;
+                    }
+                }
+
+                if(flag){
+                    orderTemp2.setIsComplete(true);
+                    purchaseOrderRepository.save(orderTemp2);
+                }
+            }
+
+            return new ResponseEntity<>(orderTemp, HttpStatus.OK);
         } catch (Exception e) {
             log.error("Error inesperado al crear InInk: {}", e.getMessage(), e);
-            throw new RuntimeException("Error inesperado al crear InInk");
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -74,10 +138,10 @@ public class InInkService {
     @Transactional
     public ResponseEntity<InInk> updateInInk(InInk inInk) {
         try {
-            Optional<InInk> search = inInkRepository.findById(inInk.getId_Ink());
+            Optional<InInk> search = inInkRepository.findById(inInk.getIdInInk());
             if(search.isPresent()) {
                 InInk updatedInInk = search.get();
-                inInk.setId_Ink(updatedInInk.getId_Ink());
+                inInk.setIdInInk(updatedInInk.getIdInInk());
                 inInkRepository.save(inInk);
                 return new ResponseEntity<>(inInk, HttpStatus.OK);
             }
@@ -105,29 +169,8 @@ public class InInkService {
     }
 
     @Transactional
-    public ResponseEntity<List<InInk>> createSeveral(List<InInk> inInks){
-        try{
-            if(!inInks.isEmpty()){
-                List<InInk> savedInks = inInkRepository.saveAll(inInks);
-
-                List<Ink> stockInks = savedInks.stream()
-                        .map(inInk -> Ink.builder()
-                                .inInk(inInk)
-                                .volumeUsed(0L)
-                                .totalKilograms(inInk.getQuantity() * inInk.getUnits())
-                                .remainingVolume(inInk.getQuantity() * inInk.getUnits())
-                                .build())
-                        .toList();
-
-                inkRepository.saveAll(stockInks);
-
-                return new ResponseEntity<>(savedInks, HttpStatus.CREATED);
-            }
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+    public ResponseEntity<PurchaseOrder> createInputsFromOrder(List<InkItemOrder> inkItemOrders, Long id){
+        return null;
     }
 
 }

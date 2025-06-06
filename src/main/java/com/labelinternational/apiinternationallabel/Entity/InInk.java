@@ -4,45 +4,32 @@ import com.labelinternational.apiinternationallabel.Entity.Enums.QualityCertific
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
-@Getter
-@Setter
-@AllArgsConstructor
+
+@Data
 @NoArgsConstructor
+@AllArgsConstructor
 @Builder
 @Entity
+@Setter
+@Getter
 public class InInk {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(unique = true, nullable = false)
-    private Long id_InInk;
+    private Long idInInk;
 
     @Column(nullable = false)
     private Date dateEntry;
 
-    @ManyToOne
-    @JoinColumn(nullable = false)
-    private Provider provider;
-
     @Column(nullable = false)
     private String invoiceRemission;// INVOICE/REMISSION - FACTURA/REMISIÓN
 
-    @ManyToOne
-    @JoinColumn(nullable = false)
-    private PurchaseOrder purchaseOrder;
-
     @Column(nullable = false)
-    private String type;
-
-    @Column(nullable = false)
-    private String code;
-
-    @Column(nullable = false)
-    private Long units;
-
-    @Column(nullable = false)
-    private Long quantityKilograms;
+    private String typeMaterial;
 
     @Column(nullable = false)
     private String batchProvider;
@@ -51,28 +38,16 @@ public class InInk {
     private String internalBatch;
 
     @Column(nullable = false)
+    private Long unitsArrived;
+
+    @Column(nullable = false)
     private QualityCertificate qualityCertificate;
 
-    public void setId_Ink(Long id_InInk) {
-        this.id_InInk = id_InInk;
-    }
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "ink_item_order_id", nullable = false)
+    private InkItemOrder itemOrder;
 
-    public Long getId_Ink() {
-        return id_InInk;
-    }
+    @OneToOne(mappedBy = "inInk", cascade = CascadeType.ALL)
+    private Ink ink;
 
-    public Long getQuantity() {
-        return quantityKilograms;
-    }
-
-    @Version
-    private int version;
-
-    public Integer getVersion() {
-        return version;
-    }
-
-    public void setVersion(Integer version) {
-        this.version = version;
-    }
 }

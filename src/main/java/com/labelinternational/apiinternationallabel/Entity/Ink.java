@@ -17,8 +17,9 @@ public class Ink {
     @Column(unique = true, nullable = false)
     private Long idInk;
 
+    @JsonIgnore
     @OneToOne(fetch = FetchType.EAGER, optional = false)
-    @JoinColumn
+    @JoinColumn(name = "in_ink_id", nullable = false, unique = true)
     private InInk inInk;
 
     @Column(nullable = false)
@@ -30,6 +31,7 @@ public class Ink {
     @Column(nullable = false)
     private Long remainingVolume ;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "idProduction", nullable = true)
     private Production production;

@@ -3,7 +3,6 @@ package com.labelinternational.apiinternationallabel.Entity;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.validator.internal.IgnoreForbiddenApisErrors;
 
 @Entity
 @Data
@@ -17,6 +16,9 @@ public class PaperItemOrder {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(unique = true, nullable = false)
     private Long idPaperItemOrder;
+
+    @Column(nullable = false)
+    private Long unitsQuantity;
 
     @Column(nullable = false)
     private String codeItem;

@@ -44,9 +44,6 @@ public class PurchaseOrder {
     @Column(nullable=false)
     private String paymentMethod;
 
-    /*@Column(nullable=false)
-    private Date deliveryDate;*/
-
     @Column(nullable=false)
     private String shipment;
 

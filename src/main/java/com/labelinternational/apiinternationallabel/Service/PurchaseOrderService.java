@@ -2,9 +2,11 @@ package com.labelinternational.apiinternationallabel.Service;
 
 import com.labelinternational.apiinternationallabel.Entity.InkItemOrder;
 import com.labelinternational.apiinternationallabel.Entity.PaperItemOrder;
+import com.labelinternational.apiinternationallabel.Entity.Provider;
 import com.labelinternational.apiinternationallabel.Entity.PurchaseOrder;
 import com.labelinternational.apiinternationallabel.Repository.InkItemOrderRepository;
 import com.labelinternational.apiinternationallabel.Repository.PaperItemOrderRepository;
+import com.labelinternational.apiinternationallabel.Repository.ProviderRepository;
 import com.labelinternational.apiinternationallabel.Repository.PurchaseOrderRepository;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
@@ -13,10 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Queue;
 
 @Service
 public class PurchaseOrderService {
@@ -32,48 +32,52 @@ public class PurchaseOrderService {
 
     private static final Logger log = LoggerFactory.getLogger(InInkService.class);
 
+    @Autowired
+    private ProviderRepository providerRepository;
+
     @Transactional
     public ResponseEntity<?> createPurchaseOrder(PurchaseOrder purchaseOrder) {
         try {
-            Optional<List<PaperItemOrder>> paperInPurchaseOredr = Optional.ofNullable(purchaseOrder.getPaperItems());
-            Optional<List<InkItemOrder>> inkInPurchaseOredr = Optional.ofNullable(purchaseOrder.getInkItems());
-            if (paperInPurchaseOredr.isPresent() || inkInPurchaseOredr.isPresent()) {
-                if (paperInPurchaseOredr.isPresent()) {
+            List<InkItemOrder> inkItems = purchaseOrder.getInkItems();
+            List<PaperItemOrder> paperItems = purchaseOrder.getPaperItems();
 
-                    List<PaperItemOrder> paperItems = paperInPurchaseOredr.get();
+            if ((inkItems == null || inkItems.isEmpty()) && (paperItems == null || paperItems.isEmpty())) {
+                return new ResponseEntity<>("La orden de compra debe tener al menos un elemento", HttpStatus.NOT_ACCEPTABLE);
+            }
 
-                    purchaseOrder.setPaperItems(new ArrayList<>());
-                    PurchaseOrder savedOrder = purchaseOrderRepository.save(purchaseOrder);
+            Provider existingProvider = providerRepository.findById(purchaseOrder.getProvider().getId_Provider())
+                    .orElseThrow(() -> new RuntimeException("Proveedor no encontrado"));
+            purchaseOrder.setProvider(existingProvider);
 
-                    for (PaperItemOrder itemOrder : paperItems) {
-                        itemOrder.setPurchaseOrder(savedOrder);
-                        paperItemOrderRepository.save(itemOrder);
-                    }
-                    savedOrder.setPaperItems(paperItems);
-                    purchaseOrderRepository.save(savedOrder);
+            purchaseOrder.setInkItems(null);
+            purchaseOrder.setPaperItems(null);
+            PurchaseOrder savedOrder = purchaseOrderRepository.save(purchaseOrder);
 
-                    return new ResponseEntity<>(savedOrder, HttpStatus.CREATED);
-                }
-                List<InkItemOrder> inkItems = inkInPurchaseOredr.get();
-
-                purchaseOrder.setInkItems(new ArrayList<>());
-                PurchaseOrder savedOrder = purchaseOrderRepository.save(purchaseOrder);
-
-                for (InkItemOrder itemOrder : inkItems) {
-                    itemOrder.setPurchaseOrder(savedOrder);
-                    inkItemOrderRepository.save(itemOrder);
+            if (inkItems != null) {
+                for (InkItemOrder item : inkItems) {
+                    item.setTotalUnitsQuantityArrived(0L);
+                    item.setPurchaseOrder(savedOrder);
                 }
                 savedOrder.setInkItems(inkItems);
-                purchaseOrderRepository.save(savedOrder);
-
-                return new ResponseEntity<>(savedOrder, HttpStatus.CREATED);
             }
-            return new ResponseEntity<>("La orden de compra debe tener al menos un Elemento", HttpStatus.NOT_ACCEPTABLE);
-        }catch (Exception e) {
+
+            if (paperItems != null) {
+                for (PaperItemOrder item : paperItems) {
+                    item.setPurchaseOrder(savedOrder);
+                }
+                savedOrder.setPaperItems(paperItems);
+            }
+
+            PurchaseOrder finalSavedOrder = purchaseOrderRepository.save(savedOrder);
+
+            return new ResponseEntity<>(finalSavedOrder, HttpStatus.CREATED);
+        } catch (Exception e) {
             log.error("Error al crear la orden de compra: {}", e.getMessage(), e);
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+
 
     public ResponseEntity<PurchaseOrder> getPurchaseOrderById(Long id) {
         try {
@@ -184,9 +188,9 @@ public class PurchaseOrderService {
     }
 
     @Transactional
-    public ResponseEntity<List<PurchaseOrder>> findIncompleteOrders(){
+    public ResponseEntity<List<PurchaseOrder>> findIncompleteOrdersByMaterialTypePaper(){
         try {
-            List<PurchaseOrder> incompleteOrders = purchaseOrderRepository.findIncompleteOrders();
+            List<PurchaseOrder> incompleteOrders = purchaseOrderRepository.findIncompleteOrdersByMaterialTypePaper();
             if(!incompleteOrders.isEmpty()) {
                 return new ResponseEntity<>(incompleteOrders, HttpStatus.OK);
             }
@@ -196,4 +200,84 @@ public class PurchaseOrderService {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @Transactional
+    public ResponseEntity<List<PurchaseOrder>> findIncompleteOrdersByMaterialTypeInk(){
+        try {
+            List<PurchaseOrder> incompleteOrders = purchaseOrderRepository.findIncompleteOrdersByMaterialTypeInk();
+            if(!incompleteOrders.isEmpty()) {
+                return new ResponseEntity<>(incompleteOrders, HttpStatus.OK);
+            }
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        }catch (Exception e) {
+            log.error(e.getMessage());
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Transactional
+    public ResponseEntity<List<PurchaseOrder>> findCompleteOrdersByMaterialTypeInk(){
+        try {
+            List<PurchaseOrder> incompleteOrders = purchaseOrderRepository.findCompleteOrdersByMaterialTypeInk();
+            if(!incompleteOrders.isEmpty()) {
+                return new ResponseEntity<>(incompleteOrders, HttpStatus.OK);
+            }
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        }catch (Exception e) {
+            log.error(e.getMessage());
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Transactional
+    public ResponseEntity<List<PurchaseOrder>> findCompleteOrdersByMaterialTypePaper(){
+        try {
+            List<PurchaseOrder> incompleteOrders = purchaseOrderRepository.findCompleteOrdersByMaterialTypePaper();
+            if(!incompleteOrders.isEmpty()) {
+                return new ResponseEntity<>(incompleteOrders, HttpStatus.OK);
+            }
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        }catch (Exception e) {
+            log.error(e.getMessage());
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Transactional
+    public ResponseEntity<PurchaseOrder> findOrderByNumber(Long number) {
+        try {
+            Optional<PurchaseOrder> purchaseOrder = purchaseOrderRepository.findByPurchaseOrderNumberNativeQuery(number);
+            log.info(purchaseOrder.get().getPurchaseOrderNumber().toString());
+            if (purchaseOrder.isPresent()) {
+                return new ResponseEntity<>(purchaseOrder.get(), HttpStatus.OK);
+            }
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Transactional
+    public ResponseEntity<PurchaseOrder> findItemsInsatifiedFromNumberOrder(Long orderNumber) {
+        try{
+            Optional<PurchaseOrder> purchaseOrder = purchaseOrderRepository.findByPurchaseOrderNumberWithUnsatisfiedItems(orderNumber);
+            return purchaseOrder.map(order -> new ResponseEntity<>(order, HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(null, HttpStatus.NOT_FOUND));
+        }catch (Exception e) {
+            log.error(e.getMessage());
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Transactional
+    public ResponseEntity<InkItemOrder> sveOne(InkItemOrder inkItemOrder) {
+        try{
+           inkItemOrderRepository.save(inkItemOrder);
+           return new ResponseEntity<>(inkItemOrder, HttpStatus.CREATED);
+        }catch (Exception e) {
+            log.error(e.getMessage());
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }
+
