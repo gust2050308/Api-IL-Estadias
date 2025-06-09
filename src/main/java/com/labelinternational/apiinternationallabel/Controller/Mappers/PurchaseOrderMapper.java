@@ -1,23 +1,16 @@
 package com.labelinternational.apiinternationallabel.Controller.Mappers;
 
-import org.mapstruct.Mapping;
-import com.labelinternational.apiinternationallabel.Controller.DTOs.*;
-import com.labelinternational.apiinternationallabel.Entity.*;
+import com.labelinternational.apiinternationallabel.Controller.DTOs.InInkDto;
+import com.labelinternational.apiinternationallabel.Controller.DTOs.InkItemOrderDto;
+import com.labelinternational.apiinternationallabel.Controller.DTOs.PurchaseOrderResponseDto;
+import com.labelinternational.apiinternationallabel.Entity.InInk;
+import com.labelinternational.apiinternationallabel.Entity.InkItemOrder;
+import com.labelinternational.apiinternationallabel.Entity.PurchaseOrder;
 import org.mapstruct.Mapper;
-
+import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface PurchaseOrderMapper {
-
-    PurchaseOrderDto toDto(PurchaseOrder purchaseOrder);
-
-    @Mapping(target = "purchaseOrder", ignore = true) // Para evitar ciclo
-    InkItemOrderDto toInkItemOrderDto(InkItemOrder item);
-
-    @Mapping(target = "purchaseOrder", ignore = true)
-    PaperItemOrderDto toPaperItemOrderDto(PaperItemOrder item);
-
-    ProviderDto toProviderDto(Provider provider);
-
-    InInkDto toInInkDto(InInk inInk);
+    @Mapping(target = "inkItems", ignore = true) // Evita la serialización de items
+    PurchaseOrderResponseDto toResponseDto(PurchaseOrder order);
 }

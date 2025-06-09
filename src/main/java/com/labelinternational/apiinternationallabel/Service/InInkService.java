@@ -1,6 +1,10 @@
 package com.labelinternational.apiinternationallabel.Service;
 
+import com.labelinternational.apiinternationallabel.Controller.DTOs.InInkDto;
 import com.labelinternational.apiinternationallabel.Controller.DTOs.InkEntryDto;
+import com.labelinternational.apiinternationallabel.Controller.DTOs.PurchaseOrderResponseDto;
+import com.labelinternational.apiinternationallabel.Controller.Mappers.InInkMapper;
+import com.labelinternational.apiinternationallabel.Controller.Mappers.PurchaseOrderMapper;
 import com.labelinternational.apiinternationallabel.Entity.InInk;
 import com.labelinternational.apiinternationallabel.Entity.Ink;
 import com.labelinternational.apiinternationallabel.Entity.InkItemOrder;
@@ -18,6 +22,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,16 +41,26 @@ public class InInkService {
     @Autowired
     private PurchaseOrderRepository purchaseOrderRepository;
 
+    @Autowired
+    private InInkMapper inInkMapper;
+
+    @Autowired
+    private PurchaseOrderMapper purchaseOrderMapper;
+
     private static final Logger log = LoggerFactory.getLogger(InInkService.class);
 
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public ResponseEntity<?> createInInk(List<InkEntryDto> inInks) {
         try {
+            List<InInkDto> createdInks = new ArrayList<>();
+            PurchaseOrderResponseDto responseDto = null;
+
             for (InkEntryDto inInk : inInks) {
-                Optional<InkItemOrder> itemOrderDB = inkItemOrderRepository.findById(inInk.getIdItemOrder());
+                // 1. Buscar el InkItemOrder
+                InkItemOrder itemOrder = inkItemOrderRepository.findById(inInk.getIdItemOrder())
+                        .orElseThrow(() -> new RuntimeException("InkItemOrder no encontrado"));
 
-                InkItemOrder itemOrder = itemOrderDB.get();
-
+                // 2. Crear y guardar InInk
                 InInk nuevo = InInk.builder()
                         .dateEntry(inInk.getInkEntry().getDateEntry())
                         .invoiceRemission(inInk.getInkEntry().getInvoiceRemission())
@@ -57,52 +72,51 @@ public class InInkService {
                         .itemOrder(itemOrder)
                         .build();
 
-                itemOrder.setTotalUnitsQuantityArrived(itemOrder.getTotalUnitsQuantityArrived() + nuevo.getUnitsArrived());
-
-                if(itemOrder.getTotalUnitsQuantityArrived() >= itemOrder.getUnitsQuantity()){
-                    itemOrder.setIsSatisfied(true);
-                }
+                // 3. Actualizar InkItemOrder
+                itemOrder.setTotalUnitsQuantityArrived(
+                        itemOrder.getTotalUnitsQuantityArrived() + nuevo.getUnitsArrived()
+                );
+                itemOrder.setIsSatisfied(
+                        itemOrder.getTotalUnitsQuantityArrived() >= itemOrder.getUnitsQuantity()
+                );
 
                 inInkRepository.save(nuevo);
                 inkItemOrderRepository.save(itemOrder);
 
+                // 4. Crear y guardar Ink
                 Ink nuevaTinta = Ink.builder()
                         .inInk(nuevo)
                         .totalKilograms(nuevo.getUnitsArrived() * itemOrder.getAmountKilograms())
                         .volumeUsed(0L)
                         .remainingVolume(nuevo.getUnitsArrived() * itemOrder.getAmountKilograms())
                         .build();
-
                 inkRepository.save(nuevaTinta);
+
+                // 5. Mapear a DTO para la respuesta
+                createdInks.add(inInkMapper.toDto(nuevo)); // Usa tu Mapper aquí
             }
 
-            Optional<InkItemOrder> itemTemp0 = inkItemOrderRepository.findById(inInks.get(0).getIdItemOrder());
-            InkItemOrder itemTemp = itemTemp0.get();
-            Optional<PurchaseOrder> orderTemp = purchaseOrderRepository.findByPurchaseOrderNumberNativeQuery(itemTemp.getPurchaseOrder().getPurchaseOrderNumber());
-            if (orderTemp.isPresent()) {
-                PurchaseOrder orderTemp2 = orderTemp.get();
-                List<InkItemOrder> listToCheck = orderTemp.get().getInkItems();
-                boolean flag = false;
+            // 6. Verificar si la PurchaseOrder está completa
+            InkItemOrder firstItem = inkItemOrderRepository.findById(inInks.get(0).getIdItemOrder())
+                    .orElseThrow(() -> new RuntimeException("Item no encontrado"));
+            PurchaseOrder order = firstItem.getPurchaseOrder();
 
-                for(InkItemOrder order : listToCheck ){
-                    if(order.getIsSatisfied()){
-                        flag = true;
-                    }else {
-                        flag = false;
-                        break;
-                    }
-                }
+            boolean isOrderComplete = order.getInkItems().stream()
+                    .allMatch(InkItemOrder::getIsSatisfied);
 
-                if(flag){
-                    orderTemp2.setIsComplete(true);
-                    purchaseOrderRepository.save(orderTemp2);
-                }
+            if (isOrderComplete) {
+                order.setIsComplete(true);
+                purchaseOrderRepository.save(order);
             }
 
-            return new ResponseEntity<>(orderTemp, HttpStatus.OK);
+            // 7. Mapear la PurchaseOrder a DTO para la respuesta
+            responseDto = purchaseOrderMapper.toResponseDto(order);
+
+            return ResponseEntity.ok(responseDto);
+
         } catch (Exception e) {
-            log.error("Error inesperado al crear InInk: {}", e.getMessage(), e);
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            log.error("Error al crear InInk: {}", e.getMessage(), e);
+            return ResponseEntity.internalServerError().build();
         }
     }
 

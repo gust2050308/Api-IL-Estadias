@@ -14,6 +14,6 @@ public class InInkDto {
     private String internalBatch;
     private Integer unitsArrived;
     private String qualityCertificate;
-
+    private Long idItemOrder;
     // Importante: NO incluyas itemOrder aquí para evitar la recursividad infinita
 }

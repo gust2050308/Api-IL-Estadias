@@ -16,5 +16,4 @@ public class InkItemOrderDto {
     private String codeItem;
     private Long totalUnitsQuantityArrived;
     private Boolean isSatisfied;
-    private List<InInkDto> inInks;
 }
