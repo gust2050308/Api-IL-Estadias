@@ -1,7 +1,8 @@
 package com.labelinternational.apiinternationallabel.Controller;
 
 
-import com.labelinternational.apiinternationallabel.Controller.DTOs.InkEntryDto;
+import com.labelinternational.apiinternationallabel.DTOs.Entry.InkEntryDto;
+import com.labelinternational.apiinternationallabel.DTOs.HistoryEntriesInk;
 import com.labelinternational.apiinternationallabel.Entity.InInk;
 import com.labelinternational.apiinternationallabel.Service.InInkService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +16,7 @@ import java.util.List;
 public class InInkController {
 
     @Autowired
-    InInkService inInkService;
+    private InInkService inInkService;
 
     @PostMapping
     public ResponseEntity<?> createInInk(@RequestBody List<InkEntryDto> inInks) {
@@ -23,7 +24,7 @@ public class InInkController {
     }
 
     @GetMapping
-    public ResponseEntity<List<InInk>> getAllInInk() {
+    public ResponseEntity<List<HistoryEntriesInk>> getAllInInk() {
         return inInkService.getAllInInk();
     }
 

@@ -13,7 +13,12 @@ import lombok.*;
 @Getter
 public class PaperItemOrder {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "paperItemOrder_seq")
+    @SequenceGenerator(
+            name = "paperItemOrder_seq",
+            sequenceName = "paperItemOrder_sequence",
+            initialValue = 1000,
+            allocationSize = 7)
     @Column(unique = true, nullable = false)
     private Long idPaperItemOrder;
 

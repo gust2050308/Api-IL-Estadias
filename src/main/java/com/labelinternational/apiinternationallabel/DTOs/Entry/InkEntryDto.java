@@ -1,4 +1,4 @@
-package com.labelinternational.apiinternationallabel.Controller.DTOs;
+package com.labelinternational.apiinternationallabel.DTOs.Entry;
 
 import com.labelinternational.apiinternationallabel.Entity.InInk;
 import lombok.Data;

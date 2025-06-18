@@ -1,10 +1,11 @@
 package com.labelinternational.apiinternationallabel.Service;
 
-import com.labelinternational.apiinternationallabel.Controller.DTOs.InInkDto;
-import com.labelinternational.apiinternationallabel.Controller.DTOs.InkEntryDto;
-import com.labelinternational.apiinternationallabel.Controller.DTOs.PurchaseOrderResponseDto;
-import com.labelinternational.apiinternationallabel.Controller.Mappers.InInkMapper;
-import com.labelinternational.apiinternationallabel.Controller.Mappers.PurchaseOrderMapper;
+import com.labelinternational.apiinternationallabel.DTOs.Entry.InkEntryDto;
+import com.labelinternational.apiinternationallabel.DTOs.HistoryEntriesInk;
+import com.labelinternational.apiinternationallabel.DTOs.InkItemOrderWithEntriesDto;
+import com.labelinternational.apiinternationallabel.Mappers.InInkMapper;
+import com.labelinternational.apiinternationallabel.Mappers.InkItemOrderMapper;
+import com.labelinternational.apiinternationallabel.Mappers.PurchaseOrderMapper;
 import com.labelinternational.apiinternationallabel.Entity.InInk;
 import com.labelinternational.apiinternationallabel.Entity.Ink;
 import com.labelinternational.apiinternationallabel.Entity.InkItemOrder;
@@ -22,9 +23,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class InInkService {
@@ -45,6 +48,9 @@ public class InInkService {
     private InInkMapper inInkMapper;
 
     @Autowired
+    private InkItemOrderMapper inkItemOrderMapper;
+
+    @Autowired
     private PurchaseOrderMapper purchaseOrderMapper;
 
     private static final Logger log = LoggerFactory.getLogger(InInkService.class);
@@ -52,15 +58,10 @@ public class InInkService {
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public ResponseEntity<?> createInInk(List<InkEntryDto> inInks) {
         try {
-            List<InInkDto> createdInks = new ArrayList<>();
-            PurchaseOrderResponseDto responseDto = null;
-
             for (InkEntryDto inInk : inInks) {
-                // 1. Buscar el InkItemOrder
                 InkItemOrder itemOrder = inkItemOrderRepository.findById(inInk.getIdItemOrder())
                         .orElseThrow(() -> new RuntimeException("InkItemOrder no encontrado"));
 
-                // 2. Crear y guardar InInk
                 InInk nuevo = InInk.builder()
                         .dateEntry(inInk.getInkEntry().getDateEntry())
                         .invoiceRemission(inInk.getInkEntry().getInvoiceRemission())
@@ -72,35 +73,34 @@ public class InInkService {
                         .itemOrder(itemOrder)
                         .build();
 
-                // 3. Actualizar InkItemOrder
                 itemOrder.setTotalUnitsQuantityArrived(
-                        itemOrder.getTotalUnitsQuantityArrived() + nuevo.getUnitsArrived()
+                        itemOrder.getTotalUnitsQuantityArrived().add(nuevo.getUnitsArrived())
                 );
+
                 itemOrder.setIsSatisfied(
-                        itemOrder.getTotalUnitsQuantityArrived() >= itemOrder.getUnitsQuantity()
+                        itemOrder.getTotalUnitsQuantityArrived()
+                                .compareTo(itemOrder.getUnitsQuantity()) >= 0
                 );
+
 
                 inInkRepository.save(nuevo);
                 inkItemOrderRepository.save(itemOrder);
 
-                // 4. Crear y guardar Ink
                 Ink nuevaTinta = Ink.builder()
                         .inInk(nuevo)
-                        .totalKilograms(nuevo.getUnitsArrived() * itemOrder.getAmountKilograms())
-                        .volumeUsed(0L)
-                        .remainingVolume(nuevo.getUnitsArrived() * itemOrder.getAmountKilograms())
+                        .totalKilograms(nuevo.getUnitsArrived().multiply(itemOrder.getAmountKilograms()))
+                        .volumeUsed(BigDecimal.ZERO)
+                        .remainingVolume(nuevo.getUnitsArrived().multiply(itemOrder.getAmountKilograms()))
                         .build();
                 inkRepository.save(nuevaTinta);
-
-                // 5. Mapear a DTO para la respuesta
-                createdInks.add(inInkMapper.toDto(nuevo)); // Usa tu Mapper aquí
             }
 
-            // 6. Verificar si la PurchaseOrder está completa
+            // obtener el primer item para ubicar la orden
             InkItemOrder firstItem = inkItemOrderRepository.findById(inInks.get(0).getIdItemOrder())
                     .orElseThrow(() -> new RuntimeException("Item no encontrado"));
             PurchaseOrder order = firstItem.getPurchaseOrder();
 
+            // verificar si toda la orden está satisfecha
             boolean isOrderComplete = order.getInkItems().stream()
                     .allMatch(InkItemOrder::getIsSatisfied);
 
@@ -109,10 +109,12 @@ public class InInkService {
                 purchaseOrderRepository.save(order);
             }
 
-            // 7. Mapear la PurchaseOrder a DTO para la respuesta
-            responseDto = purchaseOrderMapper.toResponseDto(order);
+            // Mapea solo los InkItemOrder a DTO con entradas
+            List<InkItemOrderWithEntriesDto> responseItems = order.getInkItems().stream()
+                    .map(inkItemOrderMapper::toWithEntriesDto)
+                    .collect(Collectors.toList());
 
-            return ResponseEntity.ok(responseDto);
+            return ResponseEntity.ok(responseItems);
 
         } catch (Exception e) {
             log.error("Error al crear InInk: {}", e.getMessage(), e);
@@ -136,11 +138,29 @@ public class InInkService {
     }
 
     @Transactional
-    public ResponseEntity<List<InInk>> getAllInInk() {
+    public ResponseEntity<List<HistoryEntriesInk>> getAllInInk() {
         try{
             List<InInk> inInks = inInkRepository.findAll();
             if(!inInks.isEmpty()) {
-                return new ResponseEntity<>(inInks, HttpStatus.OK);
+                List<HistoryEntriesInk> historyEntriesInks = new ArrayList<HistoryEntriesInk>();
+                for (InInk inInk : inInks) {
+                    HistoryEntriesInk entry = HistoryEntriesInk.builder()
+                            .id(inInk.getIdInInk())
+                            .date(inInk.getDateEntry())
+                            .provider(inInk.getItemOrder().getPurchaseOrder().getProvider().getProvider_Name())
+                            .invoiceRemission(inInk.getInvoiceRemission())
+                            .orderNumber(inInk.getItemOrder().getPurchaseOrder().getPurchaseOrderNumber())
+                            .typeMaterial(inInk.getTypeMaterial())
+                            .code(inInk.getItemOrder().getCodeItem())
+                            .units(inInk.getUnitsArrived())
+                            .quantityKilograms(inInk.getItemOrder().getAmountKilograms())
+                            .batchProvider(inInk.getBatchProvider())
+                            .internalBatch(inInk.getInternalBatch())
+                            .qualityCertificate(inInk.getQualityCertificate())
+                            .build();
+                    historyEntriesInks.add(entry);
+                }
+                return new ResponseEntity<>(historyEntriesInks, HttpStatus.OK);
             }
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }catch (Exception e) {

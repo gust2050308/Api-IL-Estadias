@@ -66,7 +66,7 @@ public class InPaperService {
     @Transactional
     public ResponseEntity<InPaper> updateInPaper(InPaper inPaper) {
         try {
-            Optional<InPaper> paperDb = inPaperRepository.findById(inPaper.getId_inPaper());
+            Optional<InPaper> paperDb = inPaperRepository.findById(inPaper.getId());
             if (paperDb.isPresent()) {
                 InPaper paper = paperDb.get();
                 inPaperRepository.save(paper);

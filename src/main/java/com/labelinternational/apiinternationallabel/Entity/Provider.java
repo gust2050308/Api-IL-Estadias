@@ -14,7 +14,12 @@ import org.springframework.data.jpa.repository.Query;
 public class Provider {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "provider_seq")
+    @SequenceGenerator(
+            name = "provider_seq",
+            sequenceName = "provider_sequence",
+            initialValue = 1000,
+            allocationSize = 2)
     @Column(unique = true, nullable = false)
     private Long id_Provider;
 

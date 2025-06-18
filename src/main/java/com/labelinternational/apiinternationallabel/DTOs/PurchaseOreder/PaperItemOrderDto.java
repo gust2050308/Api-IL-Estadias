@@ -1,4 +1,4 @@
-package com.labelinternational.apiinternationallabel.Controller.DTOs;
+package com.labelinternational.apiinternationallabel.DTOs.PurchaseOreder;
 
 import lombok.*;
 
@@ -12,5 +12,4 @@ public class PaperItemOrderDto {
     private String codeItem;
     private Long paperWidth;
     private Long paperlength;
-
 }

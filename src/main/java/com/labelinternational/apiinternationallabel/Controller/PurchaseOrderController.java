@@ -1,5 +1,6 @@
 package com.labelinternational.apiinternationallabel.Controller;
 
+import com.labelinternational.apiinternationallabel.DTOs.PurchaseOreder.PurchaseOrderResponseDto;
 import com.labelinternational.apiinternationallabel.Entity.InkItemOrder;
 import com.labelinternational.apiinternationallabel.Entity.PurchaseOrder;
 import com.labelinternational.apiinternationallabel.Service.PurchaseOrderService;
@@ -47,7 +48,7 @@ public class PurchaseOrderController {
     }
 
     @GetMapping("/findIncompleteOrdersInk")
-    public ResponseEntity<List<PurchaseOrder>> findIncompleteOrdersInk() {
+    public ResponseEntity<List<PurchaseOrderResponseDto>> findIncompleteOrdersInk() {
         return purchaseOrderService.findIncompleteOrdersByMaterialTypeInk();
     }
 
@@ -67,7 +68,7 @@ public class PurchaseOrderController {
     }
 
     @GetMapping("/findItemsInsatisfied/{number}")
-    public ResponseEntity<PurchaseOrder> findItemsInsatisfied(@PathVariable Long number) {
+    public ResponseEntity<PurchaseOrderResponseDto> findItemsInsatisfied(@PathVariable Long number) {
         return purchaseOrderService.findItemsInsatifiedFromNumberOrder(number);
     }
 

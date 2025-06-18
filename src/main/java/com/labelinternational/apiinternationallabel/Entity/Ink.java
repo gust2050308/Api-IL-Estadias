@@ -4,6 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
+import java.util.List;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -13,26 +16,29 @@ import lombok.*;
 public class Ink {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ink_seq")
+    @SequenceGenerator(
+            name = "ink_seq",
+            sequenceName = "ink_sequence",
+            initialValue = 1000,
+            allocationSize = 3)
     @Column(unique = true, nullable = false)
     private Long idInk;
 
-    @JsonIgnore
     @OneToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "in_ink_id", nullable = false, unique = true)
     private InInk inInk;
 
     @Column(nullable = false)
-    private Long totalKilograms;
+    private BigDecimal totalKilograms;
 
     @Column(nullable = false)
-    private Long volumeUsed = 0L;
+    private BigDecimal volumeUsed = BigDecimal.valueOf(0);
 
     @Column(nullable = false)
-    private Long remainingVolume ;
-
-    @JsonIgnore
-    @ManyToOne
-    @JoinColumn(name = "idProduction", nullable = true)
-    private Production production;
+    private BigDecimal remainingVolume ;
+/*
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "idOutputInk")
+    private List<OutputInk> inks;*/
 }

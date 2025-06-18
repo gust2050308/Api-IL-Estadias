@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,21 +18,26 @@ import java.util.List;
 public class InkItemOrder {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "inkItemOrder_seq")
+    @SequenceGenerator(
+            name = "inkItemOrder_seq",
+            sequenceName = "inkItemOrder_sequence",
+            initialValue = 1000,
+            allocationSize = 2)
     @Column(unique = true, nullable = false)
     private Long idItemOrder;
 
     @Column(nullable = false)
-    private Long unitsQuantity;
+    private BigDecimal unitsQuantity;
 
     @Column(nullable = false)
-    private Long amountKilograms;
+    private BigDecimal  amountKilograms;
 
     @Column(nullable = false)
     private String codeItem;
 
-    @Column()
-    private Long totalUnitsQuantityArrived = 0L;
+    @Column(nullable = false)
+    private BigDecimal totalUnitsQuantityArrived = BigDecimal.valueOf(0);
 
     @Column(nullable = false)
     private Boolean isSatisfied = false;

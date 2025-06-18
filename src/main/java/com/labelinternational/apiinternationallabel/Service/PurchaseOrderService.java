@@ -1,5 +1,7 @@
 package com.labelinternational.apiinternationallabel.Service;
 
+import com.labelinternational.apiinternationallabel.DTOs.PurchaseOreder.PurchaseOrderResponseDto;
+import com.labelinternational.apiinternationallabel.Mappers.PurchaseOrderMapper;
 import com.labelinternational.apiinternationallabel.Entity.InkItemOrder;
 import com.labelinternational.apiinternationallabel.Entity.PaperItemOrder;
 import com.labelinternational.apiinternationallabel.Entity.Provider;
@@ -15,6 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,10 +34,14 @@ public class PurchaseOrderService {
     @Autowired
     private PaperItemOrderRepository paperItemOrderRepository;
 
-    private static final Logger log = LoggerFactory.getLogger(InInkService.class);
-
     @Autowired
     private ProviderRepository providerRepository;
+
+    @Autowired
+    private PurchaseOrderMapper purchaseOrderMapper;
+
+    private static final Logger log = LoggerFactory.getLogger(InInkService.class);
+
 
     @Transactional
     public ResponseEntity<?> createPurchaseOrder(PurchaseOrder purchaseOrder) {
@@ -55,7 +63,7 @@ public class PurchaseOrderService {
 
             if (inkItems != null) {
                 for (InkItemOrder item : inkItems) {
-                    item.setTotalUnitsQuantityArrived(0L);
+                    item.setTotalUnitsQuantityArrived(BigDecimal.ZERO);
                     item.setPurchaseOrder(savedOrder);
                 }
                 savedOrder.setInkItems(inkItems);
@@ -202,18 +210,23 @@ public class PurchaseOrderService {
     }
 
     @Transactional
-    public ResponseEntity<List<PurchaseOrder>> findIncompleteOrdersByMaterialTypeInk(){
+    public ResponseEntity<List<PurchaseOrderResponseDto>> findIncompleteOrdersByMaterialTypeInk(){
         try {
             List<PurchaseOrder> incompleteOrders = purchaseOrderRepository.findIncompleteOrdersByMaterialTypeInk();
-            if(!incompleteOrders.isEmpty()) {
-                return new ResponseEntity<>(incompleteOrders, HttpStatus.OK);
+
+            if (!incompleteOrders.isEmpty()) {
+                List<PurchaseOrderResponseDto> dtoList = purchaseOrderMapper.toResponseDtoList(incompleteOrders);
+                return ResponseEntity.ok(dtoList);
             }
-            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-        }catch (Exception e) {
-            log.error(e.getMessage());
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        } catch (Exception e) {
+            log.error("Error buscando órdenes incompletas: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
+
+
 
     @Transactional
     public ResponseEntity<List<PurchaseOrder>> findCompleteOrdersByMaterialTypeInk(){
@@ -259,10 +272,11 @@ public class PurchaseOrderService {
     }
 
     @Transactional
-    public ResponseEntity<PurchaseOrder> findItemsInsatifiedFromNumberOrder(Long orderNumber) {
+    public ResponseEntity<PurchaseOrderResponseDto> findItemsInsatifiedFromNumberOrder(Long orderNumber) {
         try{
             Optional<PurchaseOrder> purchaseOrder = purchaseOrderRepository.findByPurchaseOrderNumberWithUnsatisfiedItems(orderNumber);
-            return purchaseOrder.map(order -> new ResponseEntity<>(order, HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(null, HttpStatus.NOT_FOUND));
+            PurchaseOrderResponseDto responseDto = purchaseOrderMapper.toResponseDto(purchaseOrder.get());
+            return new ResponseEntity<>(responseDto, HttpStatus.OK);
         }catch (Exception e) {
             log.error(e.getMessage());
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);

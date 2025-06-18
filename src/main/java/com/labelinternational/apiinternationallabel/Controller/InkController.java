@@ -1,5 +1,11 @@
 package com.labelinternational.apiinternationallabel.Controller;
 
+import com.labelinternational.apiinternationallabel.DTOs.DevolutionInkDto;
+import com.labelinternational.apiinternationallabel.DTOs.Entry.InkDto;
+import com.labelinternational.apiinternationallabel.DTOs.ExistenceDto;
+import com.labelinternational.apiinternationallabel.DTOs.InkSeleccionFormDto;
+import com.labelinternational.apiinternationallabel.DTOs.OutputInkDto;
+import com.labelinternational.apiinternationallabel.DTOs.inksToProduction.useInkDto;
 import com.labelinternational.apiinternationallabel.Entity.Ink;
 import com.labelinternational.apiinternationallabel.Service.InkService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,8 +48,22 @@ public class InkController {
     }
 
     @GetMapping("/findInksWithStock")
-    public ResponseEntity<List<Ink>> findInksWithStock() {
+    public ResponseEntity<List<ExistenceDto>> findInksWithStock() {
         return inkService.getAvialableInks();
     }
 
+    @PostMapping("/findSelectedInks")
+    public ResponseEntity<List<InkSeleccionFormDto>> findSelectedInks(@RequestBody List<Long> selectedInkIds) {
+        return inkService.inkToProduccion(selectedInkIds);
+    }
+
+    @PostMapping("/inksRequiredToProduction")
+    public ResponseEntity<List<OutputInkDto>> inksRequiredToProduction(@RequestBody useInkDto selectedInkIds) {
+        return inkService.inksRequiredToProduction(selectedInkIds);
+    }
+
+    @PostMapping("/OutputInkDevolution")
+    public ResponseEntity<List<InkDto>> inkDevolution(@RequestBody List<DevolutionInkDto> devolutionInkDtos){
+        return inkService.processInkDevolution(devolutionInkDtos);
+    }
 }

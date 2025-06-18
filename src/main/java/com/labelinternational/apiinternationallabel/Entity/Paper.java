@@ -12,7 +12,12 @@ import lombok.*;
 public class Paper {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "paper_seq")
+    @SequenceGenerator(
+            name = "paper_seq",
+            sequenceName = "paper_sequence",
+            initialValue = 1000,
+            allocationSize = 6)
     @Column(unique = true, nullable = false)
     private Long id_Paper;
 

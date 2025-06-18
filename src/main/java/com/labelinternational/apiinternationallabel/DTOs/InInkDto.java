@@ -1,4 +1,4 @@
-package com.labelinternational.apiinternationallabel.Controller.DTOs;
+package com.labelinternational.apiinternationallabel.DTOs;
 
 import lombok.Data;
 
@@ -15,5 +15,4 @@ public class InInkDto {
     private Integer unitsArrived;
     private String qualityCertificate;
     private Long idItemOrder;
-    // Importante: NO incluyas itemOrder aquí para evitar la recursividad infinita
 }

@@ -4,6 +4,7 @@ import com.labelinternational.apiinternationallabel.Entity.Enums.QualityCertific
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -18,7 +19,12 @@ import java.util.List;
 @Getter
 public class InInk {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "inInk_seq")
+    @SequenceGenerator(
+            name = "inInk_seq",
+            sequenceName = "inInk_sequence",
+            initialValue = 1000,
+            allocationSize = 4)
     @Column(unique = true, nullable = false)
     private Long idInInk;
 
@@ -38,7 +44,7 @@ public class InInk {
     private String internalBatch;
 
     @Column(nullable = false)
-    private Long unitsArrived;
+    private BigDecimal unitsArrived;
 
     @Column(nullable = false)
     private QualityCertificate qualityCertificate;

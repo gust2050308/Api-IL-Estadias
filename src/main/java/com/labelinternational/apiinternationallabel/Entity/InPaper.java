@@ -14,9 +14,14 @@ import java.util.Date;
 public class InPaper {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "inPaper_seq")
+    @SequenceGenerator(
+            name = "inPaper_seq",
+            sequenceName = "inPaper_sequence",
+            initialValue = 1000,
+            allocationSize = 6)
     @Column(unique = true, nullable = false)
-    private Long id_inPaper;
+    private Long id;
 
     @Column(nullable = false)
     private Date dateEntry;

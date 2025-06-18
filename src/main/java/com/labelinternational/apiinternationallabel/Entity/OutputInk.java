@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 @Entity
@@ -17,29 +18,36 @@ import java.util.Date;
 @Builder
 public class OutputInk {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "outputInk_seq")
+    @SequenceGenerator(
+            name = "outputInk_seq",
+            sequenceName = "outputInk_sequence",
+            initialValue = 1000,
+            allocationSize = 3)
     private Long idOutputInk;
 
     @Column(nullable = false)
     private Date date;
 
-    @ManyToOne
-    @JoinColumn(name = "idProduction", nullable = false)
-    private Production production;
+    @Column(nullable = false)
+    private Long production;
 
     @ManyToOne
     @JoinColumn(name = "idInk", nullable = false)
     private Ink ink;
 
     @Column(nullable = false)
-    private Long kilogramsRequired;
+    private BigDecimal kilogramsRequired;
 
     @Column(nullable = false)
-    private Long kilogramsDelivered;
+    private BigDecimal kilogramsDelivered;
 
     @Column(nullable = false)
     private String whoDelivers;
 
     @Column(nullable = false)
     private String whoReceives;
+
+    @Column(nullable = true)
+    private BigDecimal returnedKilogramsRequired = BigDecimal.ZERO;
 }

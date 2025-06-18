@@ -1,8 +1,8 @@
-package com.labelinternational.apiinternationallabel.Controller.DTOs;
+package com.labelinternational.apiinternationallabel.DTOs.PurchaseOreder;
 
-import com.labelinternational.apiinternationallabel.Controller.DTOs.ProviderDto;
 import lombok.Data;
-import lombok.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -10,9 +10,9 @@ import java.util.List;
 @Data
 @Setter
 @Getter
-public class PurchaseOrderDto {
+public class PurchaseOrderResponseDto {
     private Long id_PurchaseOrder;
-    private Long purchaseOrderNumber;
+    private Integer purchaseOrderNumber;
     private ProviderDto provider;
     private LocalDateTime requestDate;
     private LocalDateTime deliveryDateExpected;
@@ -24,4 +24,5 @@ public class PurchaseOrderDto {
     private Boolean isComplete;
     private Boolean typeMaterial;
     private List<InkItemOrderDto> inkItems;
+    private List<InkItemOrderDto> PaperItems;
 }

@@ -1,6 +1,6 @@
-package com.labelinternational.apiinternationallabel.Controller.Mappers;
+package com.labelinternational.apiinternationallabel.Mappers;
 
-import com.labelinternational.apiinternationallabel.Controller.DTOs.InInkDto;
+import com.labelinternational.apiinternationallabel.DTOs.InInkDto;
 import com.labelinternational.apiinternationallabel.Entity.InInk;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

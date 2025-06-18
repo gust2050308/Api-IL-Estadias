@@ -1,5 +1,6 @@
-package com.labelinternational.apiinternationallabel.Controller.DTOs;
+package com.labelinternational.apiinternationallabel.DTOs.PurchaseOreder;
 
+import com.labelinternational.apiinternationallabel.DTOs.InInkDto;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,4 +17,5 @@ public class InkItemOrderDto {
     private String codeItem;
     private Long totalUnitsQuantityArrived;
     private Boolean isSatisfied;
+    private List<InInkDto> inInks;
 }

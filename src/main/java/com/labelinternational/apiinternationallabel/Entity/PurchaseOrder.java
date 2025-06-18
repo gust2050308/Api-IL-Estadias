@@ -18,7 +18,12 @@ import java.util.List;
 public class PurchaseOrder {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "purchaseOrder_seq")
+    @SequenceGenerator(
+            name = "purchaseOrder_seq",
+            sequenceName = "purchaseOrder_sequence",
+            initialValue = 1000,
+            allocationSize = 5)
     @Column(nullable = false, unique = true)
     private Long id_PurchaseOrder;
 
