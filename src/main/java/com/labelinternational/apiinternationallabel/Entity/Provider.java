@@ -1,5 +1,6 @@
 package com.labelinternational.apiinternationallabel.Entity;
 
+import com.labelinternational.apiinternationallabel.Entity.Enums.ProviderType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.jpa.repository.Query;
@@ -21,21 +22,26 @@ public class Provider {
             initialValue = 1000,
             allocationSize = 2)
     @Column(unique = true, nullable = false)
-    private Long id_Provider;
+    private Long idProvider;
 
     @Column(nullable = false)
-    private String Provider_Name;
+    private String providerName;
 
     @Column(nullable = false)
-    private String Provider_Email;
+    private String providerEmail;
 
     @Column(nullable = false)
-    private String Provider_Phone;
+    private String providerPhone;
 
     @Column(nullable = false)
-    private String Provider_Address;
+    private String providerAddress;
 
     @Column(nullable = true)
-    private String Provider_Person;
+    private String providerPerson;
 
+    @Column(nullable = false)
+    private ProviderType providerType;
+
+    @Column (nullable = false)
+    private Boolean enabled = true;
 }

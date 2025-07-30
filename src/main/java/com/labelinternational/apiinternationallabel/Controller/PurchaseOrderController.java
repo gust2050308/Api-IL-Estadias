@@ -1,6 +1,7 @@
 package com.labelinternational.apiinternationallabel.Controller;
 
-import com.labelinternational.apiinternationallabel.DTOs.PurchaseOreder.PurchaseOrderResponseDto;
+import com.labelinternational.apiinternationallabel.DTOs.PurchaseOrder.InkItemOrderDto;
+import com.labelinternational.apiinternationallabel.DTOs.PurchaseOrder.PurchaseOrderResponseDto;
 import com.labelinternational.apiinternationallabel.Entity.InkItemOrder;
 import com.labelinternational.apiinternationallabel.Entity.PurchaseOrder;
 import com.labelinternational.apiinternationallabel.Service.PurchaseOrderService;
@@ -72,8 +73,13 @@ public class PurchaseOrderController {
         return purchaseOrderService.findItemsInsatifiedFromNumberOrder(number);
     }
 
-    @PostMapping("createOne")
+    @PostMapping("/createOne")
     public ResponseEntity<?> createOne(@RequestBody InkItemOrder inkItemOrder) {
         return purchaseOrderService.sveOne(inkItemOrder);
+    }
+
+    @GetMapping("/ItemsByOrderNumber/{orderNumber}")
+    private ResponseEntity<List<InkItemOrderDto>> ItemsByOrderNumber(@PathVariable Long orderNumber) {
+        return purchaseOrderService.findItemsFromOrderNumber(orderNumber);
     }
 }

@@ -1,7 +1,5 @@
 package com.labelinternational.apiinternationallabel.Entity;
 
-import com.labelinternational.apiinternationallabel.Entity.Ink;
-import com.labelinternational.apiinternationallabel.Entity.Production;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.Date;
 
 @Entity
@@ -27,7 +26,7 @@ public class OutputInk {
     private Long idOutputInk;
 
     @Column(nullable = false)
-    private Date date;
+    private Instant date;
 
     @Column(nullable = false)
     private Long production;

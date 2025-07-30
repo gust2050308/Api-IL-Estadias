@@ -1,7 +1,7 @@
 package com.labelinternational.apiinternationallabel.DTOs;
 
-import com.labelinternational.apiinternationallabel.DTOs.PurchaseOreder.InkItemOrderDto;
-import com.labelinternational.apiinternationallabel.DTOs.PurchaseOreder.ProviderDto;
+import com.labelinternational.apiinternationallabel.DTOs.PurchaseOrder.InkItemOrderDto;
+import com.labelinternational.apiinternationallabel.DTOs.PurchaseOrder.ProviderDto;
 import lombok.Data;
 import lombok.*;
 

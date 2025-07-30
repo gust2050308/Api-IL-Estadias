@@ -1,6 +1,7 @@
 package com.labelinternational.apiinternationallabel.Service;
 
-import com.labelinternational.apiinternationallabel.DTOs.PurchaseOreder.PurchaseOrderResponseDto;
+import com.labelinternational.apiinternationallabel.DTOs.PurchaseOrder.InkItemOrderDto;
+import com.labelinternational.apiinternationallabel.DTOs.PurchaseOrder.PurchaseOrderResponseDto;
 import com.labelinternational.apiinternationallabel.Mappers.PurchaseOrderMapper;
 import com.labelinternational.apiinternationallabel.Entity.InkItemOrder;
 import com.labelinternational.apiinternationallabel.Entity.PaperItemOrder;
@@ -53,7 +54,7 @@ public class PurchaseOrderService {
                 return new ResponseEntity<>("La orden de compra debe tener al menos un elemento", HttpStatus.NOT_ACCEPTABLE);
             }
 
-            Provider existingProvider = providerRepository.findById(purchaseOrder.getProvider().getId_Provider())
+            Provider existingProvider = providerRepository.findById(purchaseOrder.getProvider().getIdProvider())
                     .orElseThrow(() -> new RuntimeException("Proveedor no encontrado"));
             purchaseOrder.setProvider(existingProvider);
 
@@ -84,8 +85,6 @@ public class PurchaseOrderService {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
-
 
     public ResponseEntity<PurchaseOrder> getPurchaseOrderById(Long id) {
         try {
@@ -216,6 +215,10 @@ public class PurchaseOrderService {
 
             if (!incompleteOrders.isEmpty()) {
                 List<PurchaseOrderResponseDto> dtoList = purchaseOrderMapper.toResponseDtoList(incompleteOrders);
+                for (PurchaseOrderResponseDto dto : dtoList) {
+                    dto.setTotalItems(inkItemOrderRepository.totalItemsByOrder(dto.getPurchaseOrderNumber()));
+                    dto.setItemsArrived(inkItemOrderRepository.totalIncompleteItemsByOrder(dto.getPurchaseOrderNumber()));
+                }
                 return ResponseEntity.ok(dtoList);
             }
 
@@ -289,6 +292,20 @@ public class PurchaseOrderService {
            inkItemOrderRepository.save(inkItemOrder);
            return new ResponseEntity<>(inkItemOrder, HttpStatus.CREATED);
         }catch (Exception e) {
+            log.error(e.getMessage());
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Transactional
+    public ResponseEntity<List<InkItemOrderDto>> findItemsFromOrderNumber(Long orderNumber) {
+        try{
+            List<InkItemOrderDto> listResponse = inkItemOrderRepository.ordersFromPurchaseOrderNumber(orderNumber);
+                if (!listResponse.isEmpty()) {
+                    return new ResponseEntity<>(listResponse, HttpStatus.OK);
+                }
+                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
             log.error(e.getMessage());
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }

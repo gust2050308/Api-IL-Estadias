@@ -1,4 +1,4 @@
-package com.labelinternational.apiinternationallabel.DTOs.PurchaseOreder;
+package com.labelinternational.apiinternationallabel.DTOs.PurchaseOrder;
 
 import lombok.*;
 

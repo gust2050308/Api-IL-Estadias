@@ -1,10 +1,8 @@
 package com.labelinternational.apiinternationallabel.Service;
 
-import com.labelinternational.apiinternationallabel.DTOs.DevolutionInkDto;
+import com.labelinternational.apiinternationallabel.DTOs.*;
 import com.labelinternational.apiinternationallabel.DTOs.Entry.InkDto;
-import com.labelinternational.apiinternationallabel.DTOs.ExistenceDto;
-import com.labelinternational.apiinternationallabel.DTOs.InkSeleccionFormDto;
-import com.labelinternational.apiinternationallabel.DTOs.OutputInkDto;
+import com.labelinternational.apiinternationallabel.DTOs.OutputsDto.OutputInkDto;
 import com.labelinternational.apiinternationallabel.DTOs.inksToProduction.inkUse;
 import com.labelinternational.apiinternationallabel.DTOs.inksToProduction.useInkDto;
 import com.labelinternational.apiinternationallabel.Entity.Ink;
@@ -114,35 +112,27 @@ public class InkService {
     }
 
     @Transactional
-    public ResponseEntity<List<ExistenceDto>> getAvialableInks() {
+    public ResponseEntity<List<ExistenceDto>> getAvialableInks(Long idProvider,
+                                                               String batchProvider,
+                                                               String internalBatch,
+                                                               String typeMaterial,
+                                                               String codeItem,
+                                                               BigDecimal minRemaining,
+                                                               BigDecimal maxRemaining) {
         try{
-            List<Ink> inks = inkRepository.findInksWithStock();
-            if(!inks.isEmpty()){
-                List<ExistenceDto> existenceDtos = new ArrayList<>();
-                for(Ink ink : inks){
-                    ExistenceDto existenceDto = ExistenceDto.builder()
-                            .idInInk(ink.getIdInk())
-                            .code(ink.getInInk().getItemOrder().getCodeItem())
-                            .internalBatch(ink.getInInk().getInternalBatch())
-                            .provider(ink.getInInk().getItemOrder().getPurchaseOrder().getProvider().getProvider_Name())
-                            .remainingKilograms(ink.getRemainingVolume())
-                            .totalKilograms(ink.getTotalKilograms())
-                            .typeOfMaterial(ink.getInInk().getTypeMaterial())
-                            .usedKilograms(ink.getVolumeUsed())
-                            .batchProvider(ink.getInInk().getBatchProvider())
-                            .id(ink.getIdInk())
-                            .build();
-
-                    existenceDtos.add(existenceDto);
-                }
-                return new ResponseEntity<>(existenceDtos, HttpStatus.OK);
+            log.info(idProvider + " " + batchProvider + " " + internalBatch + " " + typeMaterial + " " + codeItem);
+            List<ExistenceDto> list = inkRepository.filterExistences(idProvider,batchProvider,internalBatch,typeMaterial,codeItem,minRemaining,maxRemaining);
+            if(!list.isEmpty()){
+                return new ResponseEntity<>(list, HttpStatus.OK);
+            }else {
+                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
             }
-            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
         }catch (Exception e){
             log.error(e.getMessage());
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 
     @Transactional
     public ResponseEntity<List<InkSeleccionFormDto>> inkToProduccion (List<Long> list){
@@ -154,7 +144,7 @@ public class InkService {
                     Ink ink1 = ink.get();
                     InkSeleccionFormDto seleccionFormDto = InkSeleccionFormDto.builder()
                             .id(ink1.getIdInk())
-                            .provider(ink1.getInInk().getItemOrder().getPurchaseOrder().getProvider().getProvider_Name())
+                            .provider(ink1.getInInk().getItemOrder().getPurchaseOrder().getProvider().getProviderName())
                             .typeMateria(ink1.getInInk().getTypeMaterial())
                             .volumenRemaiming(ink1.getRemainingVolume())
                             .build();
@@ -182,7 +172,7 @@ public class InkService {
 
                     OutputInk outputInk = OutputInk.builder()
                             //id auto
-                            .date(new Date())
+                            .date(new Date().toInstant())
                             .production(inksData.getProduction())
                             .ink(inkStock)
                             .kilogramsRequired(ink.getKilogramsRequired())
@@ -220,7 +210,6 @@ public class InkService {
                     ink.setVolumeUsed(ink.getVolumeUsed().subtract(devolution.getDevolutionQuantity()));
                     inkRepository.save(ink);
                     responseList.add(inkMapper.toDto(ink));
-
                     outputInk.setReturnedKilogramsRequired(outputInk.getReturnedKilogramsRequired().add(devolution.getDevolutionQuantity()));
                     outputInkRepository.save(outputInk);
                 }else {
@@ -229,6 +218,20 @@ public class InkService {
             }
             return new ResponseEntity<>(responseList, HttpStatus.OK);
         } catch (Exception e) {
+            log.error(e.getMessage());
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public ResponseEntity<SumariseStockInk> sumariseInkStock(){
+        try{
+            SumariseStockInk sumarise = SumariseStockInk.builder()
+                    .inksTotal(inkRepository.countInksWithStock())
+                    .totalRemaining(inkRepository.sumInksWithStock())
+                    .orderDesInkDtoList(inkRepository.getInksWithStockGroupedByType())
+                    .build();
+            return new ResponseEntity<>(sumarise, HttpStatus.OK);
+        }catch (Exception e){
             log.error(e.getMessage());
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }

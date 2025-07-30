@@ -25,10 +25,6 @@ public class Paper {
     @JoinColumn
     private InPaper inPaper;
 
-    @ManyToOne
-    @JoinColumn(name = "idProduction")
-    private Production production;
-
     @Column(nullable = true)
     private Long LargeUsed;
 

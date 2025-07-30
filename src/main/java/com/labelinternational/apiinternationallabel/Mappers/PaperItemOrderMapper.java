@@ -1,6 +1,6 @@
 package com.labelinternational.apiinternationallabel.Mappers;
 
-import com.labelinternational.apiinternationallabel.DTOs.PurchaseOreder.PaperItemOrderDto;
+import com.labelinternational.apiinternationallabel.DTOs.PurchaseOrder.PaperItemOrderDto;
 import com.labelinternational.apiinternationallabel.Entity.PaperItemOrder;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

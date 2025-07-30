@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -106,6 +107,7 @@ public class InInkService {
 
             if (isOrderComplete) {
                 order.setIsComplete(true);
+                order.setDateDelivered(new Date());
                 purchaseOrderRepository.save(order);
             }
 
@@ -147,7 +149,7 @@ public class InInkService {
                     HistoryEntriesInk entry = HistoryEntriesInk.builder()
                             .id(inInk.getIdInInk())
                             .date(inInk.getDateEntry())
-                            .provider(inInk.getItemOrder().getPurchaseOrder().getProvider().getProvider_Name())
+                            .provider(inInk.getItemOrder().getPurchaseOrder().getProvider().getProviderName())
                             .invoiceRemission(inInk.getInvoiceRemission())
                             .orderNumber(inInk.getItemOrder().getPurchaseOrder().getPurchaseOrderNumber())
                             .typeMaterial(inInk.getTypeMaterial())
